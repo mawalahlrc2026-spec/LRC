@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوابة مركز مصادر التعلم الرقمية - الواجهة المطابقة</title><style>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>بوابة مركز مصادر التعلم الرقمية - مدرسة معولة بن شمس</title><style>
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;font-family:Tahoma,Arial,sans-serif;background:#dfe8e6;color:#12313b}
 body{display:flex;flex-direction:column;align-items:center;padding:0}
@@ -131,7 +131,18 @@ body{display:flex;flex-direction:column;align-items:center;padding:0}
 
 
 .booking-new-modal{width:min(96vw,1280px);max-height:94vh}.booking-new-body{background:#f6fafb}.booking-intro{background:linear-gradient(135deg,#e9f7ff,#eefcf9);border:1px solid #b9dfe9;border-radius:16px;padding:14px 18px;margin-bottom:16px}.booking-intro b{display:block;color:#075968;font-size:19px}.booking-intro span{display:block;color:#5f7880;margin-top:5px}.booking-layout{display:grid;grid-template-columns:1.8fr 1fr;gap:16px}.booking-main,.booking-side,.today-bookings{background:#fff;border:1px solid #dbe8ea;border-radius:18px;padding:17px}.booking-instructions{background:#edf8ff;border:1px solid #b9def0;border-radius:14px;padding:12px 15px;color:#174d66}.booking-instructions ul{margin:8px 18px 0 0;line-height:1.8}.booking-date-row{display:flex;align-items:end;gap:12px;margin:15px 0}.booking-date-row>div{flex:1}.booking-date-row b{display:block;margin-bottom:7px;color:#123f58}.booking-date-row input,.booking-side input,.booking-side select,.booking-side textarea{width:100%;font:inherit;padding:12px;border:1px solid #c4d7dc;border-radius:11px;background:#fff}.today-btn,.today-head button,.reset-booking{font:inherit;border:1px solid #72b7ef;background:#f4faff;color:#0968b3;border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer}.booking-section-title{margin:15px 0 10px;color:#123f58;font-size:18px}.booking-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.booking-slot{font:inherit;padding:14px 6px;border-radius:14px;border:2px solid;font-weight:800;cursor:pointer;min-height:80px}.booking-slot small{display:block;margin-top:6px}.booking-slot.free{background:#edfbf5;border-color:#83dbb7;color:#087354}.booking-slot.busy{background:#f2f4f5;border-color:#d5dcdf;color:#849095;cursor:not-allowed}.booking-slot.selected{background:#087f78;color:#fff;border-color:#087f78}.booking-legend{display:flex;gap:20px;justify-content:center;margin:13px 0;color:#526d75}.booking-warning{background:#fff7dc;border:1px solid #efcd62;border-radius:12px;padding:11px;color:#765408}.booking-side h4{margin:0 0 12px;color:#123f58;font-size:19px}.booking-side label{display:block;font-weight:800;color:#234c5c;margin:11px 0 6px}.booking-two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.booking-summary{background:#eef7f7;color:#42656c;border-radius:11px;padding:11px;margin-top:13px}.booking-actions{display:grid;grid-template-columns:1.2fr 1fr;gap:9px;margin-top:12px}.confirm-booking{background:#0b966c}.booking-ok{display:none;background:#e7faee;color:#12643a;border:1px solid #a9dfbb;padding:11px;border-radius:11px;margin-top:10px}.today-bookings{margin-top:16px}.today-head{display:flex;align-items:center;justify-content:space-between}.today-head h4{margin:0;color:#123f58}.booking-table-wrap{overflow:auto;margin-top:10px}.booking-table-wrap table{width:100%;border-collapse:collapse;min-width:800px}.booking-table-wrap th,.booking-table-wrap td{border:1px solid #e0e9eb;padding:9px;text-align:center}.booking-table-wrap th{background:#edf3f5;color:#294f5d}.status-locked{background:#eceff1;border-radius:999px;padding:5px 9px;color:#65747a;font-weight:800}@media(max-width:900px){.booking-layout{grid-template-columns:1fr}.booking-slots{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.booking-two{grid-template-columns:1fr}.booking-date-row{align-items:stretch;flex-direction:column}.booking-slots{grid-template-columns:1fr 1fr}.booking-new-body{padding:12px}}
-</style></head><body>
+</style>
+<style id="hideLegacyBottomAdmin">
+/* إخفاء أزرار الإدارة القديمة العائمة أسفل الصفحة فقط */
+button[onclick="openLocalBookingAdmin()"],
+button[onclick*="openLocalBookingAdmin"],
+#bookingAdminLauncher,
+#visitAdminLauncher,
+.booking-admin-launcher,
+.visit-admin-launcher {display:none !important;}
+</style>
+
+</head><body>
 <div class="mobile-scroll"><main class="portal-stage" aria-label="بوابة مركز مصادر التعلم الرقمية">
 
   <div class="booking-message-panel" aria-hidden="true">
@@ -139,7 +150,7 @@ body{display:flex;flex-direction:column;align-items:center;padding:0}
   </div>
 <button class="hotspot booking" aria-label="حجز مركز مصادر التعلم" title="حجز مركز مصادر التعلم" onclick="openModal('bookingModal')"></button>
   <button class="hotspot search" aria-label="البحث في قاعدة الكتب" title="البحث في قاعدة الكتب" onclick="openSearch()"></button>
-  <button class="hotspot visit" aria-label="سجل زيارة المركز" title="سجل زيارة المركز" onclick="openModal('visitModal')"></button>
+  <button class="hotspot visit" aria-label="سجل زيارة المركز" title="سجل زيارة المركز" onclick="openInteractiveVisitModal()"></button>
   <button class="shortcut home" aria-label="الرئيسية" title="الرئيسية"></button>
   <button class="shortcut help" aria-label="دليل الاستخدام" title="دليل الاستخدام" onclick="document.getElementById('statusNote').style.display='block';setTimeout(()=>document.getElementById('statusNote').style.display='none',3500)"></button>
   
@@ -159,7 +170,7 @@ body{display:flex;flex-direction:column;align-items:center;padding:0}
   </div>
   <div class="status-note" id="statusNote">اختر إحدى الخدمات الثلاث الرئيسة: الزيارة، البحث، أو الحجز.</div>
 </main></div>
-<div id="visitModal" class="overlay" onclick="backdrop(event,this)"><div class="modal"><div class="mhead"><h3>📝 سجل زيارة المركز</h3><button class="close" onclick="closeModal('visitModal')">×</button></div><div class="mbody"><div class="choices">
+<div id="visitModal" class="overlay" style="display:none!important" onclick="backdrop(event,this)"><div class="modal"><div class="mhead"><h3>📝 سجل زيارة المركز</h3><button class="close" onclick="closeModal('visitModal')">×</button></div><div class="mbody"><div class="choices">
 <a class="choice" href="https://docs.google.com/forms/d/e/1FAIpQLSfpHlanN9rCJfQdEeTEjxnYMysVewx2xkL7RfM599WdwiZsqg/viewform?usp=dialog" target="_blank" rel="noopener"><div style="font-size:46px">🎓</div><b>زيارة الطلبة</b><span>فتح نموذج تسجيل زيارة الطلبة</span></a>
 <a class="choice" href="https://docs.google.com/forms/d/e/1FAIpQLSej6wklJm84FSLNe6tZeFSyPuOzSc_FocOqvHmfkUL-UT6fgA/viewform?usp=publish-editor" target="_blank" rel="noopener"><div style="font-size:46px">👨‍🏫</div><b>الهيئة الإدارية والتعليمية</b><span>فتح نموذج تسجيل زيارة أعضاء الهيئة</span></a>
 <a class="choice" href="https://docs.google.com/forms/d/e/1FAIpQLSccihqRXVlp3ElZlqm51BfzOvvAbY5siRm81jcpj4Nu0vD51g/viewform?usp=publish-editor" target="_blank" rel="noopener"><div style="font-size:46px">👥</div><b>زوار المدرسة</b><span>فتح نموذج تسجيل زيارة ضيوف المدرسة</span></a>
@@ -185,7 +196,48 @@ body{display:flex;flex-direction:column;align-items:center;padding:0}
 <div class="booking-layout"><section class="booking-main"><div class="booking-instructions"><b>ℹ️ تعليمات الحجز</b><ul><li>يمكن حجز حصة واحدة في كل عملية حجز.</li><li>الحصة التي تم حجزها تظهر 🔒 محجوزة ولا يمكن اختيارها مرة أخرى.</li><li>يمكنك تغيير التاريخ لمشاهدة حالة الحصص في يوم آخر.</li></ul></div>
 <div class="booking-date-row"><div><b>1. اختيار التاريخ</b><input id="trialDate" type="date"></div><button class="today-btn" onclick="setTrialToday()">اليوم</button></div>
 <h4 class="booking-section-title">2. اختر الحصة الدراسية</h4><div id="trialSlots" class="booking-slots"></div><div class="booking-legend"><span>🟢 متاحة للحجز</span><span>⚫ محجوزة</span></div><div class="booking-warning">💡 <b>ملاحظة:</b> عند تأكيد الحجز سيتم تسجيل البيانات مباشرة في هذه التجربة، ولن تكون الحصة متاحة مرة أخرى على هذا الجهاز.</div></section>
-<aside class="booking-side"><h4>👤 3. بيانات الحجز</h4><label>اسم المعلم *</label><input id="trialTeacher" placeholder="اكتب اسم المعلم"><div class="booking-two"><div><label>المادة *</label><input id="trialSubject" placeholder="المادة الدراسية"></div><div><label>الصف / الشعبة *</label><input id="trialGrade" placeholder="مثال: الثامن / 1"></div></div><label>الهدف من الحجز *</label><select id="trialPurpose"><option>تنفيذ حصة دراسية</option><option>استخدام مصادر التعلم</option><option>توظيف التقنيات الحديثة</option><option>نشاط أو تدريب</option></select><label>الاحتياجات والملاحظات</label><textarea id="trialNotes" rows="4" placeholder="أجهزة، برامج، مصادر محددة..."></textarea><div id="trialSummary" class="booking-summary">اختر التاريخ والحصة أولًا</div><div class="booking-actions"><button class="btn confirm-booking" onclick="confirmTrialBooking()">✓ تأكيد الحجز</button><button class="reset-booking" onclick="resetTrialForm()">↻ إعادة تعيين</button></div><div id="trialOk" class="booking-ok"></div></aside></div>
+<aside class="booking-side"><h4>👤 3. بيانات الحجز</h4><label>اسم المعلم *</label><input id="trialTeacher" placeholder="اكتب اسم المعلم"><div class="booking-two"><div><label>المادة *</label><select id="trialSubject">
+      <option value="">اختر المادة الدراسية</option>
+      <option>اللغة العربية</option>
+      <option>اللغة الإنجليزية</option>
+      <option>الرياضيات</option>
+      <option>العلوم</option>
+      <option>الدراسات الاجتماعية</option>
+      <option>التربية الإسلامية</option>
+      <option>تقنية المعلومات</option>
+      <option>المهارات الحياتية</option>
+      <option>الفنون التشكيلية</option>
+      <option>المهارات الموسيقية</option>
+      <option>الرياضة المدرسية</option>
+      <option>مصادر التعلم</option>
+      <option>أخرى</option>
+    </select></div><div><label>الصف / الشعبة *</label><select id="trialGrade">
+      <option value="">اختر الصف</option>
+      <option>الصف الخامس</option>
+      <option>الصف السادس</option>
+      <option>الصف السابع</option>
+      <option>الصف الثامن</option>
+      <option>الصف التاسع</option>
+      <option>الصف العاشر</option>
+      <option>الصف الحادي عشر</option>
+      <option>الصف الثاني عشر</option>
+    </select>
+    <select id="trialSection">
+      <option value="">اختر الشعبة</option>
+      <option>1</option><option>2</option><option>3</option><option>4</option>
+      <option>5</option><option>6</option><option>7</option><option>8</option>
+    </select></div></div><label>الهدف من الحجز *</label><select id="trialPurpose">
+      <option>تنفيذ حصة دراسية</option>
+      <option>القراءة والمطالعة</option>
+      <option>البحث وجمع المعلومات</option>
+      <option>استخدام مصادر التعلم</option>
+      <option>توظيف التقنيات الحديثة</option>
+      <option>تنفيذ نشاط طلابي</option>
+      <option>التدريب وورش العمل</option>
+      <option>التعلم الذاتي</option>
+      <option>مشروع أو بحث علمي</option>
+      <option>أخرى</option>
+    </select><label>الاحتياجات والملاحظات</label><textarea id="trialNotes" rows="4" placeholder="أجهزة، برامج، مصادر محددة..."></textarea><div id="trialSummary" class="booking-summary">اختر التاريخ والحصة أولًا</div><div class="booking-actions"><button class="btn confirm-booking" onclick="confirmTrialBooking()">✓ تأكيد الحجز</button><button class="reset-booking" onclick="resetTrialForm()">↻ إعادة تعيين</button></div><div id="trialOk" class="booking-ok"></div></aside></div>
 <div class="today-bookings"><div class="today-head"><h4>☷ حجوزات اليوم</h4><button onclick="renderTodayBookings()">↻ تحديث القائمة</button></div><div class="booking-table-wrap"><table><thead><tr><th>#</th><th>الحصة</th><th>اسم المعلم</th><th>المادة</th><th>الصف/الشعبة</th><th>الهدف من الحجز</th><th>الحالة</th></tr></thead><tbody id="todayBookingsBody"></tbody></table></div></div>
 </div></div></div>
 <script>
@@ -197,7 +249,7 @@ function trialBooked(){return trialRecords().map(x=>typeof x==='string'?x:x.slot
 function setTrialToday(){const d=document.getElementById('trialDate');d.value=new Date().toISOString().slice(0,10);renderTrialSlots()}
 function renderTrialSlots(){const d=document.getElementById('trialDate');if(!d)return;trialChosen='';const b=trialBooked();document.getElementById('trialSlots').innerHTML=trialNames.map(n=>{const x=b.includes(n);return `<button ${x?'disabled':''} class="booking-slot ${x?'busy':'free'}" onclick="chooseTrialSlot(this,'${n}')">${x?'🔒':'✓'} ${n}<small>${x?'محجوزة':'متاحة'}</small></button>`}).join('');document.getElementById('trialSummary').textContent='اختر التاريخ والحصة أولًا';renderTodayBookings()}
 function chooseTrialSlot(el,n){trialChosen=n;document.querySelectorAll('#trialSlots button').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');document.getElementById('trialSummary').textContent='الموعد المختار: '+document.getElementById('trialDate').value+' – '+n;document.getElementById('trialOk').style.display='none'}
-function confirmTrialBooking(){if(!trialChosen){alert('يرجى اختيار الحصة أولًا');return}const teacher=document.getElementById('trialTeacher').value.trim(),subject=document.getElementById('trialSubject').value.trim(),grade=document.getElementById('trialGrade').value.trim();if(!teacher||!subject||!grade){alert('يرجى استكمال اسم المعلم والمادة والصف/الشعبة');return}let records=trialRecords();if(records.some(x=>(typeof x==='string'?x:x.slot)===trialChosen)){alert('عذرًا، تم حجز هذه الحصة بالفعل');renderTrialSlots();return}records.push({slot:trialChosen,teacher,subject,grade,purpose:document.getElementById('trialPurpose').value,notes:document.getElementById('trialNotes').value.trim(),createdAt:new Date().toISOString()});localStorage.setItem(trialKey(),JSON.stringify(records));const o=document.getElementById('trialOk');o.style.display='block';o.innerHTML='✅ تم تأكيد حجز <b>'+trialChosen+'</b> للمعلم <b>'+teacher+'</b> في النسخة التجريبية.';renderTrialSlots();o.style.display='block'}
+function confirmTrialBooking(){if(!trialChosen){alert('يرجى اختيار الحصة أولًا');return}const teacher=document.getElementById('trialTeacher').value.trim(),subject=document.getElementById('trialSubject').value.trim(),grade=document.getElementById('trialGrade').value.trim();if(!teacher||!subject||!grade){alert('يرجى استكمال اسم المعلم والمادة والصف/الشعبة');return}let records=trialRecords();if(records.some(x=>(typeof x==='string'?x:x.slot)===trialChosen)){alert('عذرًا، تم حجز هذه الحصة بالفعل');renderTrialSlots();return}records.push({id:'B'+Date.now(),slot:trialChosen,teacher,subject,grade:grade+' / '+section,purpose:document.getElementById('trialPurpose').value,notes:document.getElementById('trialNotes').value.trim(),createdAt:new Date().toISOString()});localStorage.setItem(trialKey(),JSON.stringify(records));const o=document.getElementById('trialOk');o.style.display='block';o.innerHTML='✅ تم تأكيد حجز <b>'+trialChosen+'</b> للمعلم <b>'+teacher+'</b> في النسخة التجريبية.';renderTrialSlots();o.style.display='block'}
 function resetTrialForm(){trialChosen='';['trialTeacher','trialSubject','trialGrade','trialNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('trialPurpose').selectedIndex=0;document.getElementById('trialOk').style.display='none';renderTrialSlots()}
 function renderTodayBookings(){const body=document.getElementById('todayBookingsBody');if(!body)return;const today=new Date().toISOString().slice(0,10);let rec=[];try{rec=JSON.parse(localStorage.getItem('mawala_booking_trial_'+today)||'[]')}catch(e){};rec=rec.map(x=>typeof x==='string'?{slot:x,teacher:'—',subject:'—',grade:'—',purpose:'—'}:x);body.innerHTML=rec.length?rec.map((x,i)=>`<tr><td>${i+1}</td><td>${x.slot}</td><td>${x.teacher||'—'}</td><td>${x.subject||'—'}</td><td>${x.grade||'—'}</td><td>${x.purpose||'—'}</td><td><span class="status-locked">🔒 محجوزة</span></td></tr>`).join(''):'<tr><td colspan="7" style="color:#7a8d93">لا توجد حجوزات مسجلة اليوم في هذه النسخة التجريبية.</td></tr>'}
 function initTrialBooking(){const d=document.getElementById('trialDate');if(!d)return;const today=new Date().toISOString().slice(0,10);d.value=d.value||today;d.min=today;d.onchange=renderTrialSlots;renderTrialSlots()}
@@ -216,4 +268,538 @@ function showAll(){document.getElementById('q').value='';mode='all';document.que
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function render(arr,total){const r=document.getElementById('results');if(!arr.length){r.innerHTML='<div class="empty">لا توجد نتائج مطابقة</div>';return}r.innerHTML=(total>arr.length?'<div class="empty" style="padding:10px">عرض أول '+arr.length+' نتيجة من '+total+'</div>':'')+arr.map(b=>`<div class="result"><h4>${esc(b.title||'بدون عنوان')}</h4><div class="meta">${b.author?`<span class="tag">المؤلف: ${esc(b.author)}</span>`:''}${b.subject?`<span class="tag">الموضوع: ${esc(b.subject)}</span>`:''}${b.class?`<span class="tag">التصنيف: ${esc(b.class)}</span>`:''}${b.request?`<span class="tag">الطلب: ${esc(b.request)}</span>`:''}${b.year?`<span class="tag">السنة: ${esc(b.year)}</span>`:''}${b.loan?`<span class="tag">${esc(b.loan)}</span>`:''}</div></div>`).join('')}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.overlay.show').forEach(x=>x.classList.remove('show'))})
-</script></body></html>
+</script>
+<style>
+#localBookingAdmin{direction:rtl;font-family:inherit}
+.lba-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.lba-btn{border:0;border-radius:11px;padding:10px 14px;cursor:pointer;font-weight:700;background:#0b7285;color:#fff}
+.lba-btn.secondary{background:#eef4f5;color:#164e5b;border:1px solid #bfd2d6}
+.lba-btn.danger{background:#b63b3b}
+.lba-filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
+.lba-filters input{padding:10px;border:1px solid #cbdadd;border-radius:10px;width:100%}
+.lba-table-wrap{overflow:auto;border:1px solid #dbe6e8;border-radius:12px}
+.lba-table{width:100%;border-collapse:collapse;min-width:820px}
+.lba-table th,.lba-table td{padding:9px;border-bottom:1px solid #e4ecee;text-align:right;font-size:13px}
+.lba-table th{background:#0d6677;color:#fff;position:sticky;top:0}
+.lba-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.lba-stat{background:#f0f8f7;padding:12px;border-radius:12px;text-align:center}
+.lba-stat b{display:block;font-size:21px;color:#087665}
+@media(max-width:700px){.lba-filters,.lba-stats{grid-template-columns:1fr 1fr}}
+@media print{
+ body *{visibility:hidden!important}
+ #localBookingAdmin,#localBookingAdmin *{visibility:visible!important}
+ #localBookingAdmin{position:absolute;inset:0;background:#fff;padding:18px}
+ .lba-toolbar,.lba-filters,.lba-action{display:none!important}
+ .lba-table-wrap{overflow:visible;border:0}
+ .lba-table{min-width:0;font-size:11px}
+}
+</style>
+
+<script>
+(function(){
+ const DBKEY='mawala_lrc_bookings_v1';
+ const TRIAL_PREFIX='mawala_booking_trial_';
+
+ function loadBookings(){
+   const all=[];
+   // Read every date-based booking record created by the booking screen.
+   for(let i=0;i<localStorage.length;i++){
+     const k=localStorage.key(i);
+     if(!k || !k.startsWith(TRIAL_PREFIX)) continue;
+     const date=k.slice(TRIAL_PREFIX.length);
+     try{
+       const arr=JSON.parse(localStorage.getItem(k)||'[]');
+       (Array.isArray(arr)?arr:[]).forEach((x,j)=>{
+         if(typeof x==='string') x={slot:x};
+         all.push({
+           id:x.id || (date+'|'+(x.slot||'')+'|'+j),
+           date:date,
+           slot:x.slot||'',
+           teacher:x.teacher||'—',
+           subject:x.subject||'—',
+           grade:x.grade||'—',
+           purpose:x.purpose||'—',
+           notes:x.notes||'',
+           createdAt:x.createdAt ? new Date(x.createdAt).toLocaleString('ar-OM') : '—'
+         });
+       });
+     }catch(e){}
+   }
+   return all;
+ }
+ function saveBookings(x){
+   // Rebuild the same date-based storage used by the booking screen.
+   const keys=[];
+   for(let i=0;i<localStorage.length;i++){
+     const k=localStorage.key(i); if(k&&k.startsWith(TRIAL_PREFIX))keys.push(k);
+   }
+   keys.forEach(k=>localStorage.removeItem(k));
+   const byDate={};
+   x.forEach(r=>{
+     if(!r.date)return;
+     (byDate[r.date]||(byDate[r.date]=[])).push({
+       id:r.id,slot:r.slot,teacher:r.teacher,subject:r.subject,grade:r.grade,
+       purpose:r.purpose,notes:r.notes,
+       createdAt:r.createdAtRaw||r.createdAt||new Date().toISOString()
+     });
+   });
+   Object.entries(byDate).forEach(([d,arr])=>localStorage.setItem(TRIAL_PREFIX+d,JSON.stringify(arr)));
+ }
+ window.LRCBookingDB={load:loadBookings,save:saveBookings};
+
+ // A durable local API for the single-center-computer model.
+ window.lrcAddBooking=function(rec){
+   const all=loadBookings();
+   if(all.some(x=>x.date===rec.date && x.slot===rec.slot)) return {ok:false,message:'الحصة محجوزة بالفعل'};
+   rec.id='B'+Date.now(); rec.createdAt=new Date().toLocaleString('ar-OM');
+   all.push(rec); saveBookings(all); return {ok:true,record:rec};
+ };
+ window.lrcIsBooked=function(date,slot){return loadBookings().some(x=>x.date===date&&x.slot===slot)};
+
+ window.openLocalBookingAdmin=function(){
+   let host=document.getElementById('localBookingAdmin');
+   if(!host){
+     host=document.createElement('div'); host.id='localBookingAdmin';
+     host.style.cssText='position:fixed;inset:0;z-index:99999;background:#fff;overflow:auto;padding:20px';
+     document.body.appendChild(host);
+   }
+   host.style.display='block'; renderAdmin();
+ };
+ window.closeLocalBookingAdmin=function(){const h=document.getElementById('localBookingAdmin');if(h)h.style.display='none'};
+
+ function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+ function renderAdmin(){
+   const h=document.getElementById('localBookingAdmin'); if(!h)return;
+   h.innerHTML=`<div style="max-width:1180px;margin:auto">
+   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2 style="margin:0;color:#075d6b">سجل حجوزات مركز مصادر التعلم</h2><div>مدرسة معولة بن شمس للتعليم الأساسي (5–12)</div></div><button class="lba-btn secondary" onclick="closeLocalBookingAdmin()">إغلاق ✕</button></div>
+   <div class="lba-stats"><div class="lba-stat"><b id="stAll">0</b>إجمالي الحجوزات</div><div class="lba-stat"><b id="stToday">0</b>حجوزات اليوم</div><div class="lba-stat"><b id="stTeachers">0</b>المعلمون المستفيدون</div><div class="lba-stat"><b id="stSlots">0</b>الحصص المستخدمة</div></div>
+   <div class="lba-filters"><input type="date" id="fFrom"><input type="date" id="fTo"><input id="fText" placeholder="بحث باسم المعلم أو المادة أو الصف"></div>
+   <div class="lba-toolbar"><button class="lba-btn" style="font-size:16px;padding:13px 20px" onclick="window.print()">🖨️ طباعة سجل الحجوزات / حفظ PDF</button><button class="lba-btn secondary" onclick="exportLRCBookings()">⬇️ نسخة احتياطية</button><button class="lba-btn secondary" onclick="document.getElementById('restoreBookings').click()">⬆️ استعادة نسخة</button><input type="file" id="restoreBookings" accept=".json" style="display:none" onchange="restoreLRCBookings(this)"><button class="lba-btn secondary" onclick="renderLRCBookings()">تحديث</button></div>
+   <div class="lba-table-wrap"><table class="lba-table"><thead><tr><th>#</th><th>التاريخ</th><th>الحصة</th><th>المعلم</th><th>المادة</th><th>الصف/الشعبة</th><th>الهدف</th><th>الاحتياجات/الملاحظات</th><th>وقت التسجيل</th><th class="lba-action">إجراء</th></tr></thead><tbody id="lbaRows"></tbody></table></div>
+   <p style="font-size:12px;color:#667;margin-top:10px">نسخة تجريبية للجهاز الواحد: تحفظ البيانات على هذا المتصفح. استخدم «نسخة احتياطية» بصورة دورية.</p>
+   </div>`;
+   ['fFrom','fTo','fText'].forEach(id=>document.getElementById(id).addEventListener('input',renderLRCBookings));
+   renderLRCBookings();
+ }
+ window.renderLRCBookings=function(){
+   const all=loadBookings(), today=new Date().toISOString().slice(0,10);
+   const from=document.getElementById('fFrom')?.value||'', to=document.getElementById('fTo')?.value||'', q=(document.getElementById('fText')?.value||'').trim().toLowerCase();
+   const rows=all.filter(x=>(!from||x.date>=from)&&(!to||x.date<=to)&&(!q||JSON.stringify(x).toLowerCase().includes(q))).sort((a,b)=>(a.date+a.slot).localeCompare(b.date+b.slot));
+   document.getElementById('stAll').textContent=all.length;
+   document.getElementById('stToday').textContent=all.filter(x=>x.date===today).length;
+   document.getElementById('stTeachers').textContent=new Set(all.map(x=>x.teacher).filter(Boolean)).size;
+   document.getElementById('stSlots').textContent=new Set(all.map(x=>x.slot).filter(Boolean)).size;
+   document.getElementById('lbaRows').innerHTML=rows.length?rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.date)}</td><td>${esc(x.slot)}</td><td>${esc(x.teacher)}</td><td>${esc(x.subject)}</td><td>${esc(x.grade)}</td><td>${esc(x.purpose)}</td><td>${esc(x.notes)}</td><td>${esc(x.createdAt)}</td><td class="lba-action"><button class="lba-btn danger" style="padding:6px 9px" onclick="deleteLRCBooking('${x.id}')">إلغاء</button></td></tr>`).join(''):`<tr><td colspan="10" style="text-align:center;padding:25px">لا توجد حجوزات مطابقة.</td></tr>`;
+ };
+ window.deleteLRCBooking=function(id){
+   if(!confirm('هل تريد إلغاء هذا الحجز وإتاحة الحصة من جديد؟'))return;
+   saveBookings(loadBookings().filter(x=>x.id!==id));
+   renderLRCBookings();
+   if(typeof renderTrialSlots==='function')renderTrialSlots();
+ };
+ window.exportLRCBookings=function(){
+   const blob=new Blob([JSON.stringify(loadBookings(),null,2)],{type:'application/json'});
+   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='نسخة_احتياطية_حجوزات_مركز_مصادر_التعلم.json';a.click();URL.revokeObjectURL(a.href);
+ };
+ window.restoreLRCBookings=function(inp){
+   const f=inp.files&&inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!Array.isArray(x))throw 0;if(confirm('سيتم استبدال سجل الحجوزات الحالي بالنسخة الاحتياطية. متابعة؟')){saveBookings(x);renderLRCBookings();alert('تمت الاستعادة بنجاح.')}}catch(e){alert('ملف النسخة الاحتياطية غير صالح.')}};r.readAsText(f);inp.value='';
+ };
+
+ // Add an always-accessible management button.
+ document.addEventListener('DOMContentLoaded',()=>{
+   const b=document.createElement('button'); b.textContent='⚙️ إدارة الحجوزات والتقارير';
+   b.onclick=openLocalBookingAdmin;
+   b.style.cssText='position:fixed;bottom:18px;left:18px;z-index:9998;background:#075d6b;color:#fff;border:0;border-radius:18px;padding:12px 16px;font-weight:700;box-shadow:0 5px 18px #0003;cursor:pointer';
+   /* زر إدارة الحجوزات السفلي أُلغي من الواجهة */
+   const p=document.createElement('button'); p.textContent='🖨️ طباعة سجل الحجوزات';
+   p.onclick=function(){ openLocalBookingAdmin(); setTimeout(()=>window.print(),250); };
+   p.style.cssText='position:fixed;bottom:68px;left:18px;z-index:9998;background:#ffffff;color:#075d6b;border:2px solid #075d6b;border-radius:18px;padding:12px 16px;font-weight:700;box-shadow:0 5px 18px #0002;cursor:pointer';
+   document.body.appendChild(p);
+ });
+})();
+</script>
+
+
+<style>
+#interactiveVisitModal{display:none;position:fixed;inset:0;background:#073946a8;z-index:100000;overflow:auto;padding:14px}
+#interactiveVisitModal.show{display:block}.visitBox{max-width:960px;margin:22px auto;background:#fff;border-radius:24px;padding:22px;direction:rtl}
+.vHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.vClose{border:0;background:#edf3f3;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer}
+.vTabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.vTab{border:1px solid #b9d7d2;background:#edf9f5;color:#086a5b;padding:12px;border-radius:13px;font-weight:800;cursor:pointer}.vTab.on{background:#087665;color:#fff}
+.vGrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.vGrid input,.vGrid select,.vGrid textarea{width:100%;padding:11px;border:1px solid #c7d8da;border-radius:11px;font-family:inherit}.vFull{grid-column:1/-1}
+.vBtn{border:0;background:#087366;color:#fff;border-radius:12px;padding:12px 17px;font-weight:800;cursor:pointer}.vBtn.alt{background:#eef4f5;color:#075d6b;border:1px solid #bcd2d6}.vBtn.red{background:#b63b3b}
+.vTools{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.vTableWrap{overflow:auto;border:1px solid #dbe6e8;border-radius:12px}.vTable{width:100%;border-collapse:collapse;min-width:850px}.vTable th,.vTable td{padding:9px;border-bottom:1px solid #e5eded;text-align:right;font-size:13px}.vTable th{background:#0d6677;color:white}.vOk{display:none;background:#e7faee;color:#12643a;padding:12px;border-radius:12px;margin-top:12px}
+.vStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.vStat{background:#f0f8f7;border-radius:12px;text-align:center;padding:11px}.vStat b{display:block;color:#087665;font-size:21px}
+@media(max-width:700px){.vGrid{grid-template-columns:1fr}.vFull{grid-column:auto}.vTabs{grid-template-columns:1fr}.vStats{grid-template-columns:1fr 1fr}}
+@media print{
+ body *{visibility:hidden!important}#interactiveVisitModal,#interactiveVisitModal *{visibility:visible!important}#interactiveVisitModal{display:block!important;position:absolute;inset:0;background:#fff;padding:0}.visitBox{margin:0;max-width:none;box-shadow:none}
+ .vTabs,.vGrid,.vOk,.vClose,.vNoPrint{display:none!important}.vTableWrap{overflow:visible;border:0}.vTable{min-width:0}.vTable th,.vTable td{font-size:11px;padding:6px}
+}
+</style>
+<div id="interactiveVisitModal"><div class="visitBox">
+ <div class="vHead"><div><h2 style="margin:0;color:#075d6b">سجل زيارة مركز مصادر التعلم</h2><div>مدرسة معولة بن شمس للتعليم الأساسي (5–12)</div></div><button class="vClose" onclick="closeInteractiveVisitModal()">×</button></div>
+ <div class="vTabs vNoPrint"><button class="vTab on" onclick="setVisitType('طالب',this)">🎓 زيارة طالب</button><button class="vTab" onclick="setVisitType('هيئة إدارية وتعليمية',this)">👨‍🏫 الهيئة الإدارية والتعليمية</button><button class="vTab" onclick="setVisitType('زائر خارجي',this)">👤 زائر خارجي</button></div>
+ <div class="vGrid vNoPrint">
+   <input id="vName" placeholder="اسم الزائر">
+   <input id="vOrg" placeholder="الصف / الجهة / المسمى الوظيفي">
+   <select id="vPurpose"><option value="">اختر هدف الزيارة</option><option>القراءة والمطالعة</option><option>البحث وجمع المعلومات</option><option>استخدام الحاسب والإنترنت</option><option>الاستفادة من مصادر التعلم</option><option>تنفيذ حصة دراسية</option><option>تنفيذ مشغل</option><option>تنفيذ ورشة تدريبية</option><option>تنفيذ نشاط أو مهمة</option><option>اجتماع أو زيارة رسمية</option><option>أخرى</option></select>
+   <input id="vDate" type="date">
+   <textarea class="vFull" id="vNotes" rows="2" placeholder="ملاحظات - اختياري"></textarea>
+ </div>
+ <div class="vTools vNoPrint"><button class="vBtn" onclick="saveVisit()">✓ تسجيل الزيارة</button><button class="vBtn alt" onclick="window.print()">🖨️ طباعة التقرير</button><button class="vBtn alt" onclick="exportVisits()">⬇️ نسخة احتياطية</button></div>
+ <div class="vOk" id="vOk">تم تسجيل الزيارة بنجاح.</div>
+ <div class="vStats"><div class="vStat"><b id="vsAll">0</b>إجمالي الزيارات</div><div class="vStat"><b id="vsToday">0</b>زيارات اليوم</div><div class="vStat"><b id="vsStudents">0</b>الطلبة</div><div class="vStat"><b id="vsStaff">0</b>الهيئة والزوار</div></div>
+ <h3>سجل الزيارات</h3>
+ <div class="vTools vNoPrint"><input id="vSearch" oninput="renderVisits()" placeholder="بحث بالاسم أو الهدف..." style="padding:10px;border:1px solid #c7d8da;border-radius:10px;min-width:240px"></div>
+ <div class="vTableWrap"><table class="vTable"><thead><tr><th>#</th><th>التاريخ</th><th>النوع</th><th>الاسم</th><th>الصف/الجهة</th><th>هدف الزيارة</th><th>وقت التسجيل</th><th class="vNoPrint">إجراء</th></tr></thead><tbody id="vRows"></tbody></table></div>
+</div></div>
+<script>
+(function(){
+ const VK='mawala_lrc_visits_v1'; let visitType='طالب';
+ const load=()=>{try{return JSON.parse(localStorage.getItem(VK)||'[]')}catch(e){return[]}};
+ const save=x=>localStorage.setItem(VK,JSON.stringify(x));
+ window.setVisitType=function(t,b){visitType=t;document.querySelectorAll('.vTab').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById('vOrg').placeholder=t==='طالب'?'الصف / الشعبة':(t==='زائر خارجي'?'الجهة':'المسمى الوظيفي / القسم')};
+ window.openInteractiveVisitModal=function(){document.getElementById('interactiveVisitModal').classList.add('show');document.getElementById('vDate').value=new Date().toISOString().slice(0,10);renderVisits()};
+ window.closeInteractiveVisitModal=function(){document.getElementById('interactiveVisitModal').classList.remove('show')};
+ window.saveVisit=function(){
+  const name=vName.value.trim(),org=vOrg.value.trim(),purpose=vPurpose.value,date=vDate.value;
+  if(!name||!org||!purpose||!date)return alert('يرجى إكمال البيانات الأساسية.');
+  const a=load();a.push({id:'V'+Date.now(),date,type:visitType,name,org,purpose,notes:vNotes.value.trim(),createdAt:new Date().toLocaleString('ar-OM')});save(a);
+  vName.value='';vOrg.value='';vPurpose.value='';vNotes.value='';vOk.style.display='block';setTimeout(()=>vOk.style.display='none',1800);renderVisits();
+ };
+ window.renderVisits=function(){
+  const a=load(),today=new Date().toISOString().slice(0,10),q=(document.getElementById('vSearch')?.value||'').trim().toLowerCase();
+  const f=a.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q)).sort((x,y)=>(y.date+y.createdAt).localeCompare(x.date+x.createdAt));
+  vsAll.textContent=a.length;vsToday.textContent=a.filter(x=>x.date===today).length;vsStudents.textContent=a.filter(x=>x.type==='طالب').length;vsStaff.textContent=a.filter(x=>x.type!=='طالب').length;
+  vRows.innerHTML=f.length?f.map((x,i)=>`<tr><td>${i+1}</td><td>${x.date}</td><td>${x.type}</td><td>${x.name}</td><td>${x.org}</td><td>${x.purpose}</td><td>${x.createdAt}</td><td class="vNoPrint"><button class="vBtn red" style="padding:5px 8px" onclick="deleteVisit('${x.id}')">حذف</button></td></tr>`).join(''):`<tr><td colspan="8" style="text-align:center;padding:22px">لا توجد زيارات مسجلة.</td></tr>`;
+ };
+ window.deleteVisit=function(id){if(confirm('هل تريد حذف هذا السجل؟')){save(load().filter(x=>x.id!==id));renderVisits()}};
+ window.exportVisits=function(){const b=new Blob([JSON.stringify(load(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='نسخة_احتياطية_سجل_زيارات_المركز.json';a.click();URL.revokeObjectURL(a.href)};
+ document.addEventListener('DOMContentLoaded',()=>{
+   // Redirect any card/link whose visible text indicates the visit register to our interactive window.
+   [...document.querySelectorAll('a,button,[onclick]')].forEach(el=>{
+     const t=(el.innerText||el.textContent||'').replace(/\s+/g,' ').trim();
+     if(/سجل زيارة المركز|زوار المركز/.test(t) && !el.closest('#interactiveVisitModal')){
+       if(el.tagName==='A') el.removeAttribute('href');
+       el.onclick=function(e){e.preventDefault();openInteractiveVisitModal();return false};
+     }
+   });
+ });
+})();
+</script>
+
+
+<style>
+.daily-print-sheet{display:none;direction:rtl;font-family:Tahoma,Arial,sans-serif;color:#111}
+.dp-head{text-align:center;border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:12px;line-height:1.7}
+.dp-head h2{margin:5px 0}.dp-meta{display:flex;justify-content:space-between;gap:20px;margin:10px 0;font-weight:700}
+.dp-table{width:100%;border-collapse:collapse}.dp-table th,.dp-table td{border:1px solid #333;padding:6px;text-align:center;font-size:11px}.dp-table th{background:#eee}
+.dp-foot{display:flex;justify-content:space-between;margin-top:28px;font-weight:700}
+.dp-empty{text-align:center;padding:30px;border:1px solid #777}
+@media print{
+ body.print-daily *{visibility:hidden!important}
+ body.print-daily .daily-print-sheet,body.print-daily .daily-print-sheet *{visibility:visible!important}
+ body.print-daily .daily-print-sheet{display:block!important;position:absolute;inset:0;padding:12mm;background:white}
+ @page{size:A4 landscape;margin:10mm}
+}
+</style>
+<div id="dailyPrintSheet" class="daily-print-sheet"></div>
+<script>
+(function(){
+ const VKEY='mawala_lrc_visits_v1', BPREFIX='mawala_booking_trial_';
+ function arDate(d){try{return new Date(d+'T12:00:00').toLocaleDateString('ar-OM',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}catch(e){return d}}
+ function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+ function head(title,date,count){return `<div class="dp-head"><div>وزارة التعليم</div><div>المديرية العامة للتربية والتعليم بمحافظة جنوب الباطنة</div><div>مدرسة معولة بن شمس للتعليم الأساسي (5–12)</div><div>مركز مصادر التعلم</div><h2>${title}</h2></div><div class="dp-meta"><span>التاريخ: ${esc(arDate(date))}</span><span>إجمالي السجلات: ${count}</span></div>`}
+ function foot(){return `<div class="dp-foot"><span>أخصائي مركز مصادر التعلم: ____________________</span><span>التوقيع: ____________________</span></div>`}
+ function doPrint(markup){
+   const s=document.getElementById('dailyPrintSheet');s.innerHTML=markup;document.body.classList.add('print-daily');
+   const cleanup=()=>{document.body.classList.remove('print-daily');s.innerHTML='';window.removeEventListener('afterprint',cleanup)};
+   window.addEventListener('afterprint',cleanup);setTimeout(()=>window.print(),120);
+ }
+ window.printTodayVisits=function(){
+   const date=new Date().toISOString().slice(0,10);let all=[];try{all=JSON.parse(localStorage.getItem(VKEY)||'[]')}catch(e){}
+   const rows=all.filter(x=>x.date===date);
+   let body=rows.length?`<table class="dp-table"><thead><tr><th>م</th><th>نوع الزيارة</th><th>اسم الزائر</th><th>الصف/الشعبة أو الجهة</th><th>هدف الزيارة</th><th>وقت التسجيل</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.type)}</td><td>${esc(x.name)}</td><td>${esc(x.org)}</td><td>${esc(x.purpose)}</td><td>${esc(x.createdAt)}</td></tr>`).join('')}</tbody></table>`:`<div class="dp-empty">لا توجد زيارات مسجلة لهذا اليوم.</div>`;
+   doPrint(head('سجل الزيارات اليومي',date,rows.length)+body+foot());
+ };
+ window.printTodayBookings=function(){
+   const date=new Date().toISOString().slice(0,10);let rows=[];try{rows=JSON.parse(localStorage.getItem(BPREFIX+date)||'[]')}catch(e){}
+   let body=rows.length?`<table class="dp-table"><thead><tr><th>م</th><th>الحصة</th><th>اسم المعلم</th><th>المادة</th><th>الصف/الشعبة</th><th>هدف الحجز</th><th>الاحتياجات/الملاحظات</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.slot)}</td><td>${esc(x.teacher)}</td><td>${esc(x.subject)}</td><td>${esc(x.grade)}</td><td>${esc(x.purpose)}</td><td>${esc(x.notes)}</td></tr>`).join('')}</tbody></table>`:`<div class="dp-empty">لا توجد حجوزات مسجلة لهذا اليوم.</div>`;
+   doPrint(head('سجل حجوزات مركز مصادر التعلم اليومي',date,rows.length)+body+foot());
+ };
+ document.addEventListener('DOMContentLoaded',()=>{
+   // Clear standalone older print launcher(s), then add two explicit daily buttons.
+   [...document.querySelectorAll('button')].forEach(b=>{if((b.textContent||'').includes('طباعة سجل الحجوزات') && !b.closest('#localBookingAdmin'))b.remove()});
+   /* أزرار السجلات السفلية أُلغيت لتبسيط الواجهة */
+
+   // Also add context-specific daily print button inside visit window.
+   const vt=document.querySelector('#interactiveVisitModal .vTools');
+   if(vt){const b=document.createElement('button');b.className='vBtn alt';b.textContent='🖨️ طباعة سجل زيارات اليوم';b.onclick=printTodayVisits;vt.appendChild(b)}
+ });
+})();
+</script>
+
+
+<style>
+.backup-admin{margin:28px auto 10px;max-width:1050px;background:#fff;border:1px solid #dce8e8;border-radius:18px;padding:16px;direction:rtl}
+.backup-admin summary{cursor:pointer;font-weight:800;color:#075d6b;list-style:none}
+.backup-admin summary::-webkit-details-marker{display:none}
+.backup-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.backup-btn{border:0;border-radius:11px;padding:10px 14px;font-weight:800;cursor:pointer;background:#075d6b;color:#fff}
+.backup-btn.alt{background:#eef5f5;color:#075d6b;border:1px solid #bfd4d6}
+.backup-note{font-size:12px;color:#667;line-height:1.7;margin-top:10px}
+</style>
+<details class="backup-admin">
+ <summary>🔐 النسخ الاحتياطي والاستعادة</summary>
+ <div class="backup-actions">
+   <button class="backup-btn" onclick="downloadFullBackup()">⬇️ تنزيل نسخة احتياطية شاملة</button>
+   <button class="backup-btn alt" onclick="document.getElementById('fullBackupRestore').click()">⬆️ استعادة نسخة احتياطية</button>
+   <input id="fullBackupRestore" type="file" accept=".json" style="display:none" onchange="restoreFullBackup(this)">
+ </div>
+ <div class="backup-note">تحفظ النسخة الشاملة بيانات الحجوزات وسجل الزيارات الموجودة على هذا الجهاز. يُنصح بحفظ نسخة دورية في مكان آمن، مثل نهاية كل أسبوع أو شهر.</div>
+</details>
+<script>
+(function(){
+ const VISITS='mawala_lrc_visits_v1', PREFIX='mawala_booking_trial_';
+ function bookingData(){
+   const x={};
+   for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(PREFIX))x[k]=localStorage.getItem(k)}
+   return x;
+ }
+ window.downloadFullBackup=function(){
+   const payload={
+     system:'Mawala Bin Shams LRC Portal',
+     version:1,
+     exportedAt:new Date().toISOString(),
+     visits:localStorage.getItem(VISITS)||'[]',
+     bookings:bookingData()
+   };
+   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+   a.download='نسخة_احتياطية_شاملة_مركز_مصادر_التعلم_'+new Date().toISOString().slice(0,10)+'.json';
+   a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ };
+ window.restoreFullBackup=function(inp){
+   const f=inp.files&&inp.files[0];if(!f)return;
+   const r=new FileReader();
+   r.onload=function(){
+     try{
+       const p=JSON.parse(r.result);
+       if(p.system!=='Mawala Bin Shams LRC Portal'||!p.bookings)throw new Error();
+       if(!confirm('ستتم استعادة بيانات الحجوزات والزيارات من هذا الملف، وقد تستبدل البيانات الحالية. هل تريد المتابعة؟'))return;
+       const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(PREFIX))keys.push(k)}
+       keys.forEach(k=>localStorage.removeItem(k));
+       localStorage.setItem(VISITS,p.visits||'[]');
+       Object.entries(p.bookings).forEach(([k,v])=>{if(k.startsWith(PREFIX))localStorage.setItem(k,v)});
+       alert('تمت استعادة النسخة الاحتياطية بنجاح.');
+       if(typeof renderVisits==='function')renderVisits();
+       if(typeof renderTrialSlots==='function')renderTrialSlots();
+     }catch(e){alert('تعذر الاستعادة: الملف ليس نسخة احتياطية صالحة لهذه البوابة.')}
+     finally{inp.value=''}
+   };r.readAsText(f);
+ };
+})();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('button').forEach(function(b){
+    const t=(b.textContent||'').replace(/\s+/g,' ').trim();
+    if(t.includes('إدارة الحجوزات والتقارير') ||
+       t.includes('إدارة سجل الحجوزات والزيارات') ||
+       t.includes('إدارة الحجوزات والزيارات')){
+      b.remove();
+    }
+  });
+});
+</script>
+
+
+<style id="final-clean-footer-admin">
+/* النسخة النهائية: إخفاء مشغلات الإدارة القديمة أسفل الواجهة */
+.final-hidden-admin-launcher{display:none!important}
+</style>
+<script>
+(function(){
+ function cleanLegacyLaunchers(){
+   const phrases=['إدارة الحجوزات','إدارة سجل الزيارات','إدارة الزيارات'];
+   document.querySelectorAll('a,button,div,span').forEach(function(el){
+     if(el.closest('#interactiveVisitModal') || el.closest('#localBookingAdmin')) return;
+     const t=(el.textContent||'').replace(/\s+/g,' ').trim();
+     if(phrases.some(p=>t===p || (t.includes(p) && t.length<45))){
+       // Target only small clickable footer controls, not large content containers.
+       const clickable=el.matches('a,button') || el.hasAttribute('onclick') || getComputedStyle(el).cursor==='pointer';
+       if(clickable) el.classList.add('final-hidden-admin-launcher');
+     }
+   });
+ }
+ document.addEventListener('DOMContentLoaded',cleanLegacyLaunchers);
+ setTimeout(cleanLegacyLaunchers,300);
+})();
+</script>
+
+
+<script id="central-booking-api">
+/* الربط المركزي للحجوزات عبر Google Apps Script */
+const BOOKING_API = 'https://script.google.com/macros/s/AKfycbz42anlwR2acTKIwa12c2PVsZOvrmjrcKxR_Hm6C6efaQy9s-cn4-tekC4X7GnweTpkqQ/exec';
+let centralBookingsCache = [];
+
+function escBooking(v) {
+  return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+async function fetchCentralBookings(date) {
+  const r = await fetch(BOOKING_API + '?date=' + encodeURIComponent(date) + '&_=' + Date.now(), {
+    method: 'GET',
+    cache: 'no-store'
+  });
+  if (!r.ok) throw new Error('تعذر الاتصال بخدمة الحجز');
+  const data = await r.json();
+  if (!data.ok) throw new Error(data.message || 'تعذر قراءة الحجوزات');
+  return Array.isArray(data.booked) ? data.booked : [];
+}
+
+async function renderTrialSlots() {
+  const d = document.getElementById('trialDate');
+  const slots = document.getElementById('trialSlots');
+  if (!d || !slots || !d.value) return;
+
+  trialChosen = '';
+  document.getElementById('trialSummary').textContent = 'جاري التحقق من الحجوزات...';
+  slots.innerHTML = trialNames.map(n =>
+    `<button disabled class="booking-slot"><span>⏳</span> ${n}<small>جاري التحقق...</small></button>`
+  ).join('');
+
+  try {
+    centralBookingsCache = await fetchCentralBookings(d.value);
+    const bookedNames = centralBookingsCache.map(x => typeof x === 'string' ? x : x.slot);
+
+    slots.innerHTML = trialNames.map(n => {
+      const busy = bookedNames.includes(n);
+      return `<button ${busy ? 'disabled' : ''} class="booking-slot ${busy ? 'busy' : 'free'}"
+        onclick="chooseTrialSlot(this,'${n}')">
+        ${busy ? '🔒' : '✓'} ${n}
+        <small>${busy ? 'محجوزة' : 'متاحة'}</small>
+      </button>`;
+    }).join('');
+
+    document.getElementById('trialSummary').textContent = 'اختر الحصة المتاحة';
+    await renderTodayBookings();
+  } catch (e) {
+    slots.innerHTML = `<div style="grid-column:1/-1;padding:18px;border-radius:12px;background:#fff3cd;color:#725b00">
+      ⚠️ تعذر الاتصال بسجل الحجوزات المركزي. تحقق من اتصال الإنترنت أو إعداد نشر Apps Script.
+    </div>`;
+    document.getElementById('trialSummary').textContent = 'تعذر تحميل حالة الحصص';
+    console.error(e);
+  }
+}
+
+async function confirmTrialBooking() {
+  if (!trialChosen) {
+    alert('يرجى اختيار الحصة أولًا');
+    return;
+  }
+
+  const date = document.getElementById('trialDate').value;
+  const teacher = document.getElementById('trialTeacher').value.trim();
+  const subject = document.getElementById('trialSubject').value.trim();
+  const grade = document.getElementById('trialGrade').value.trim();
+  const section = document.getElementById('trialSection').value.trim();
+  const purpose = document.getElementById('trialPurpose').value;
+  const notes = document.getElementById('trialNotes').value.trim();
+
+  if (!date || !teacher || !subject || !grade || !section || !purpose) {
+    alert('يرجى استكمال التاريخ واسم المعلم والمادة والصف والشعبة والهدف من الحجز.');
+    return;
+  }
+
+  const btn = document.querySelector('.confirm-booking');
+  const oldText = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ جارٍ تأكيد الحجز...'; }
+
+  try {
+    const response = await fetch(BOOKING_API, {
+      method: 'POST',
+      body: JSON.stringify({
+        date, slot: trialChosen, teacher, subject, grade, section, purpose, notes
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.ok) {
+      alert(result.message || 'تعذر تسجيل الحجز.');
+      await renderTrialSlots();
+      return;
+    }
+
+    const o = document.getElementById('trialOk');
+    o.style.display = 'block';
+    o.innerHTML = '✅ تم تأكيد حجز <b>' + escBooking(trialChosen) +
+      '</b> للمعلم <b>' + escBooking(teacher) +
+      '</b> وحفظه في السجل المركزي.';
+
+    trialChosen = '';
+    await renderTrialSlots();
+    o.style.display = 'block';
+  } catch (e) {
+    alert('تعذر الاتصال بخدمة الحجز. لم يتم تأكيد الحجز.\nتحقق من الإنترنت وإعداد نشر Apps Script.');
+    console.error(e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = oldText; }
+  }
+}
+
+async function renderTodayBookings() {
+  const body = document.getElementById('todayBookingsBody');
+  if (!body) return;
+
+  const today = new Date().toISOString().slice(0,10);
+  body.innerHTML = '<tr><td colspan="7" style="color:#7a8d93">⏳ جاري تحميل حجوزات اليوم...</td></tr>';
+
+  try {
+    const rec = await fetchCentralBookings(today);
+    body.innerHTML = rec.length ? rec.map((x,i) => {
+      const gradeSection = x.section ? `${x.grade || '—'} / ${x.section}` : (x.grade || '—');
+      return `<tr>
+        <td>${i+1}</td>
+        <td>${escBooking(x.slot || '—')}</td>
+        <td>${escBooking(x.teacher || '—')}</td>
+        <td>${escBooking(x.subject || '—')}</td>
+        <td>${escBooking(gradeSection)}</td>
+        <td>${escBooking(x.purpose || '—')}</td>
+        <td><span class="status-locked">🔒 محجوزة</span></td>
+      </tr>`;
+    }).join('') :
+    '<tr><td colspan="7" style="color:#7a8d93">لا توجد حجوزات مسجلة اليوم.</td></tr>';
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="7" style="color:#a33">تعذر تحميل الحجوزات المركزية.</td></tr>';
+    console.error(e);
+  }
+}
+
+function resetTrialForm() {
+  trialChosen = '';
+  ['trialTeacher','trialNotes'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['trialSubject','trialGrade','trialSection','trialPurpose'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
+  });
+  const ok = document.getElementById('trialOk');
+  if (ok) ok.style.display = 'none';
+  renderTrialSlots();
+}
+
+function initTrialBooking() {
+  const d = document.getElementById('trialDate');
+  if (!d) return;
+  const today = new Date().toISOString().slice(0,10);
+  d.value = d.value || today;
+  d.min = today;
+  d.onchange = renderTrialSlots;
+  renderTrialSlots();
+}
+</script>
+
+</body></html>
