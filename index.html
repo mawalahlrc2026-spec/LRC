@@ -640,7 +640,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 <script id="central-booking-api">
-/* الربط المركزي للحجوزات عبر Google Apps Script */
+/* الربط المركزي للحجوزات - GET فقط لتوافق أفضل مع GitHub Pages و Apps Script */
 const BOOKING_API = 'https://script.google.com/macros/s/AKfycbz42anlwR2acTKIwa12c2PVsZOvrmjrcKxR_Hm6C6efaQy9s-cn4-tekC4X7GnweTpkqQ/exec';
 let centralBookingsCache = [];
 
@@ -648,13 +648,22 @@ function escBooking(v) {
   return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
 
-async function fetchCentralBookings(date) {
-  const r = await fetch(BOOKING_API + '?date=' + encodeURIComponent(date) + '&_=' + Date.now(), {
+async function apiJSON(params) {
+  const qs = new URLSearchParams(params);
+  qs.set('_', Date.now().toString());
+  const response = await fetch(BOOKING_API + '?' + qs.toString(), {
     method: 'GET',
-    cache: 'no-store'
+    cache: 'no-store',
+    redirect: 'follow'
   });
-  if (!r.ok) throw new Error('تعذر الاتصال بخدمة الحجز');
-  const data = await r.json();
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  const text = await response.text();
+  try { return JSON.parse(text); }
+  catch(e) { throw new Error('استجابة غير صالحة من خدمة الحجز'); }
+}
+
+async function fetchCentralBookings(date) {
+  const data = await apiJSON({action:'list', date});
   if (!data.ok) throw new Error(data.message || 'تعذر قراءة الحجوزات');
   return Array.isArray(data.booked) ? data.booked : [];
 }
@@ -665,7 +674,9 @@ async function renderTrialSlots() {
   if (!d || !slots || !d.value) return;
 
   trialChosen = '';
-  document.getElementById('trialSummary').textContent = 'جاري التحقق من الحجوزات...';
+  const summary = document.getElementById('trialSummary');
+  if (summary) summary.textContent = 'جاري التحقق من الحجوزات...';
+
   slots.innerHTML = trialNames.map(n =>
     `<button disabled class="booking-slot"><span>⏳</span> ${n}<small>جاري التحقق...</small></button>`
   ).join('');
@@ -683,22 +694,19 @@ async function renderTrialSlots() {
       </button>`;
     }).join('');
 
-    document.getElementById('trialSummary').textContent = 'اختر الحصة المتاحة';
+    if (summary) summary.textContent = 'اختر الحصة المتاحة';
     await renderTodayBookings();
   } catch (e) {
     slots.innerHTML = `<div style="grid-column:1/-1;padding:18px;border-radius:12px;background:#fff3cd;color:#725b00">
-      ⚠️ تعذر الاتصال بسجل الحجوزات المركزي. تحقق من اتصال الإنترنت أو إعداد نشر Apps Script.
+      ⚠️ تعذر الاتصال بسجل الحجوزات المركزي. افتح رابط Apps Script مباشرة للتأكد من أن الاستجابة JSON.
     </div>`;
-    document.getElementById('trialSummary').textContent = 'تعذر تحميل حالة الحصص';
+    if (summary) summary.textContent = 'تعذر تحميل حالة الحصص';
     console.error(e);
   }
 }
 
 async function confirmTrialBooking() {
-  if (!trialChosen) {
-    alert('يرجى اختيار الحصة أولًا');
-    return;
-  }
+  if (!trialChosen) { alert('يرجى اختيار الحصة أولًا'); return; }
 
   const date = document.getElementById('trialDate').value;
   const teacher = document.getElementById('trialTeacher').value.trim();
@@ -713,19 +721,13 @@ async function confirmTrialBooking() {
     return;
   }
 
-  const btn = document.querySelector('.confirm-booking');
-  const oldText = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = '⏳ جارٍ تأكيد الحجز...'; }
+  const chosenBeforeRequest = trialChosen;
 
   try {
-    const response = await fetch(BOOKING_API, {
-      method: 'POST',
-      body: JSON.stringify({
-        date, slot: trialChosen, teacher, subject, grade, section, purpose, notes
-      })
+    const result = await apiJSON({
+      action:'book', date, slot:chosenBeforeRequest, teacher, subject,
+      grade, section, purpose, notes
     });
-
-    const result = await response.json();
 
     if (!result.ok) {
       alert(result.message || 'تعذر تسجيل الحجز.');
@@ -733,71 +735,49 @@ async function confirmTrialBooking() {
       return;
     }
 
-    const o = document.getElementById('trialOk');
-    o.style.display = 'block';
-    o.innerHTML = '✅ تم تأكيد حجز <b>' + escBooking(trialChosen) +
-      '</b> للمعلم <b>' + escBooking(teacher) +
-      '</b> وحفظه في السجل المركزي.';
-
-    trialChosen = '';
     await renderTrialSlots();
-    o.style.display = 'block';
+    const o = document.getElementById('trialOk');
+    if (o) {
+      o.style.display = 'block';
+      o.innerHTML = '✅ تم تأكيد حجز <b>' + escBooking(chosenBeforeRequest) +
+        '</b> للمعلم <b>' + escBooking(teacher) + '</b> وحفظه في السجل المركزي.';
+    }
   } catch (e) {
-    alert('تعذر الاتصال بخدمة الحجز. لم يتم تأكيد الحجز.\nتحقق من الإنترنت وإعداد نشر Apps Script.');
+    alert('تعذر الاتصال بخدمة الحجز. لم يتم تأكيد الحجز.');
     console.error(e);
-  } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = oldText; }
   }
 }
 
 async function renderTodayBookings() {
   const body = document.getElementById('todayBookingsBody');
   if (!body) return;
-
   const today = new Date().toISOString().slice(0,10);
-  body.innerHTML = '<tr><td colspan="7" style="color:#7a8d93">⏳ جاري تحميل حجوزات اليوم...</td></tr>';
-
+  body.innerHTML = '<tr><td colspan="7">⏳ جاري تحميل حجوزات اليوم...</td></tr>';
   try {
     const rec = await fetchCentralBookings(today);
     body.innerHTML = rec.length ? rec.map((x,i) => {
-      const gradeSection = x.section ? `${x.grade || '—'} / ${x.section}` : (x.grade || '—');
-      return `<tr>
-        <td>${i+1}</td>
-        <td>${escBooking(x.slot || '—')}</td>
-        <td>${escBooking(x.teacher || '—')}</td>
-        <td>${escBooking(x.subject || '—')}</td>
-        <td>${escBooking(gradeSection)}</td>
-        <td>${escBooking(x.purpose || '—')}</td>
-        <td><span class="status-locked">🔒 محجوزة</span></td>
-      </tr>`;
-    }).join('') :
-    '<tr><td colspan="7" style="color:#7a8d93">لا توجد حجوزات مسجلة اليوم.</td></tr>';
-  } catch (e) {
+      const gs = x.section ? `${x.grade || '—'} / ${x.section}` : (x.grade || '—');
+      return `<tr><td>${i+1}</td><td>${escBooking(x.slot||'—')}</td><td>${escBooking(x.teacher||'—')}</td>
+      <td>${escBooking(x.subject||'—')}</td><td>${escBooking(gs)}</td><td>${escBooking(x.purpose||'—')}</td>
+      <td><span class="status-locked">🔒 محجوزة</span></td></tr>`;
+    }).join('') : '<tr><td colspan="7">لا توجد حجوزات مسجلة اليوم.</td></tr>';
+  } catch(e) {
     body.innerHTML = '<tr><td colspan="7" style="color:#a33">تعذر تحميل الحجوزات المركزية.</td></tr>';
-    console.error(e);
   }
 }
 
 function resetTrialForm() {
-  trialChosen = '';
-  ['trialTeacher','trialNotes'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  ['trialSubject','trialGrade','trialSection','trialPurpose'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
-  });
-  const ok = document.getElementById('trialOk');
-  if (ok) ok.style.display = 'none';
+  trialChosen='';
+  ['trialTeacher','trialNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['trialSubject','trialGrade','trialSection','trialPurpose'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  const ok=document.getElementById('trialOk');if(ok)ok.style.display='none';
   renderTrialSlots();
 }
 
 function initTrialBooking() {
-  const d = document.getElementById('trialDate');
-  if (!d) return;
-  const today = new Date().toISOString().slice(0,10);
-  d.value = d.value || today;
-  d.min = today;
-  d.onchange = renderTrialSlots;
+  const d=document.getElementById('trialDate'); if(!d)return;
+  const today=new Date().toISOString().slice(0,10);
+  d.value=d.value||today; d.min=today; d.onchange=renderTrialSlots;
   renderTrialSlots();
 }
 </script>
