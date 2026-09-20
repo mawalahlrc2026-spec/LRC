@@ -142,6 +142,27 @@ button[onclick*="openLocalBookingAdmin"],
 .visit-admin-launcher {display:none !important;}
 </style>
 
+
+<style>
+#bookingConnectionStatus{margin:10px 0;padding:10px 12px;border-radius:11px;font-weight:700;font-size:13px;display:none}
+#bookingConnectionStatus.ok{display:block;background:#e8f8ef;color:#176b42;border:1px solid #bde5cd}
+#bookingConnectionStatus.wait{display:block;background:#eef6ff;color:#285f91;border:1px solid #cbdff3}
+#bookingConnectionStatus.bad{display:block;background:#fff0f0;color:#9a3030;border:1px solid #efc6c6}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ const slots=document.getElementById('trialSlots');
+ if(slots&&!document.getElementById('bookingConnectionStatus')){
+  const s=document.createElement('div');s.id='bookingConnectionStatus';
+  slots.parentNode.insertBefore(s,slots);
+ }
+});
+function setBookingConnectionStatus(type,text){
+ const s=document.getElementById('bookingConnectionStatus');if(!s)return;
+ s.className=type;s.textContent=text;
+}
+</script>
+
 </head><body>
 <div class="mobile-scroll"><main class="portal-stage" aria-label="بوابة مركز مصادر التعلم الرقمية">
 
@@ -663,9 +684,12 @@ async function apiJSON(params) {
 }
 
 async function fetchCentralBookings(date) {
+  setBookingConnectionStatus('wait','⏳ جارٍ الاتصال بسجل الحجوزات المركزي...');
   const data = await apiJSON({action:'list', date});
   if (!data.ok) throw new Error(data.message || 'تعذر قراءة الحجوزات');
-  return Array.isArray(data.booked) ? data.booked : [];
+  const list=Array.isArray(data.booked)?data.booked:[];
+  setBookingConnectionStatus('ok','✓ تم الاتصال بالسجل المركزي — الحجوزات لهذا التاريخ: '+list.length);
+  return list;
 }
 
 async function renderTrialSlots() {
@@ -701,6 +725,7 @@ async function renderTrialSlots() {
       ⚠️ تعذر الاتصال بسجل الحجوزات المركزي. افتح رابط Apps Script مباشرة للتأكد من أن الاستجابة JSON.
     </div>`;
     if (summary) summary.textContent = 'تعذر تحميل حالة الحصص';
+    setBookingConnectionStatus('bad','⚠️ تعذر الاتصال من هذه الصفحة. ارفع الملف إلى GitHub Pages واختبره من رابط الموقع، وليس بفتحه مباشرة من الكمبيوتر.');
     console.error(e);
   }
 }
