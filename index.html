@@ -935,6 +935,8 @@ function normalizeCentralBookings(rawList, date){
 }
 
 /* كل حجوزات السجل المركزي في طلب واحد — نفس المصدر الذي يُحسب منه العدد وتُعرض منه القائمة */
+/* معرّف الحذف: رقم الحجز، وإن كان الصف القديم بلا رقم نستخدم التاريخ + الحصة */
+function bookingDelToken(x){return x&&x.id?String(x.id):('K:'+bookingNormDate(x&&x.date)+'|'+bookingNormSlot(x&&x.slot))}
 async function fetchAllCentralBookings(){
   const data=await apiJSON({action:'list'});
   if(!data||data.ok===false) throw new Error((data&&data.message)||'تعذر قراءة الحجوزات');
@@ -942,7 +944,7 @@ async function fetchAllCentralBookings(){
   const hidden=(typeof getHiddenIds_==='function')?getHiddenIds_('mawala_hidden_bookings_v1'):new Set();
   const map=new Map();
   normalizeCentralBookings(raw,'').forEach(x=>{
-    if(x.id && hidden.has(String(x.id))) return;
+    if(hidden.has(bookingDelToken(x))) return;
     const k=x.id?('id:'+x.id):(x.date+'|'+x.slot+'|'+(x.teacher||'')+'|'+(x.createdAt||''));
     map.set(k,x);
   });
@@ -1656,7 +1658,7 @@ function printBookRequests(){
         }
         return r;
       });
-      content.innerHTML='<div class="stats-bulkbar"><span>إجمالي الحجوزات: <b>'+rows.length+'</b></span><label><input type="checkbox" id="statsSelectAllBookings" onchange="toggleAllBookingRows(this.checked)"> تحديد الكل</label><button class="stats-delete-btn" onclick="deleteSelectedBookings()">🗑️ حذف المحدد</button><span id="statsSelectedCount">0 محدد</span></div>'+table(rows,[['تحديد',x=>'<input class="stats-booking-check" type="checkbox" value="'+String(x.id||'').replace(/"/g,'')+'" onchange="updateBookingSelectedCount()">'],['التاريخ',x=>statsDate(x.date)||'—'],['الحصة',x=>x.slot||'—'],['المعلم',x=>x.teacher||'—'],['المادة',x=>x.subject||'—'],['الصف',x=>x.grade||'—'],['الشعبة',x=>x.section||'—'],['هدف الحجز',x=>x.purpose||'—'],['إجراء',x=>'<button class="stats-delete-btn" onclick="event.stopPropagation();deleteStatsBooking(\''+String(x.id||'').replace(/'/g,'')+'\')">🗑️ حذف</button>']]).replace(/&lt;button/g,'<button').replace(/&lt;\/button&gt;/g,'</button>').replace(/&lt;input/g,'<input').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+      content.innerHTML='<div class="stats-bulkbar"><span>إجمالي الحجوزات: <b>'+rows.length+'</b></span><label><input type="checkbox" id="statsSelectAllBookings" onchange="toggleAllBookingRows(this.checked)"> تحديد الكل</label><button class="stats-delete-btn" onclick="deleteSelectedBookings()">🗑️ حذف المحدد</button><span id="statsSelectedCount">0 محدد</span></div>'+table(rows,[['تحديد',x=>'<input class="stats-booking-check" type="checkbox" value="'+bookingDelToken(x).replace(/"/g,'')+'" onchange="updateBookingSelectedCount()">'],['التاريخ',x=>statsDate(x.date)||'—'],['الحصة',x=>x.slot||'—'],['المعلم',x=>x.teacher||'—'],['المادة',x=>x.subject||'—'],['الصف',x=>x.grade||'—'],['الشعبة',x=>x.section||'—'],['هدف الحجز',x=>x.purpose||'—'],['إجراء',x=>'<button class="stats-delete-btn" onclick="event.stopPropagation();deleteStatsBooking(\''+bookingDelToken(x).replace(/'/g,'')+'\')">🗑️ حذف</button>']]).replace(/&lt;button/g,'<button').replace(/&lt;\/button&gt;/g,'</button>').replace(/&lt;input/g,'<input').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
     }else if(kind==='requests'){
       title.textContent='📚 قائمة طلبات الكتب';
       let rows=Array.isArray(window.__centralBookRequests)?window.__centralBookRequests:null;
