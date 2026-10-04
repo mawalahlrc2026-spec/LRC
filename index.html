@@ -2040,7 +2040,7 @@ document.addEventListener('keydown', function(e){
   <div class="visit-welcome-card">
     <div class="visit-welcome-icon">👋</div>
     <h2 id="visitWelcomeTitle">مرحبًا بكم في بوابة مركز مصادر التعلم</h2>
-    <p>للاستفادة من خدمات البوابة، يجب أولًا تسجيل زيارتكم في <b>سجل زوار المركز</b>؛ وذلك لأغراض توثيق الاستفادة وتطوير خدمات المركز.</p><div class="visit-welcome-required">⚠️ تسجيل الزيارة إلزامي، ولا يمكن استخدام خدمات البوابة قبل إتمامه.</div>
+    <p>للاستفادة من خدمات البوابة، يجب أولًا تسجيل زيارتكم في <b>سجل زوار المركز</b>؛ وذلك لأغراض توثيق الاستفادة وتطوير خدمات المركز.</p><div class="visit-welcome-required">⚠️ تسجيل الزيارة إلزامي ويتجدد يوميًا، ولا يمكن استخدام خدمات البوابة قبل إتمامه.</div>
     <div class="visit-welcome-actions">
       <button type="button" class="visit-welcome-primary" onclick="startVisitRegistration()">📝 تسجيل الزيارة الآن</button>
     </div>
@@ -2125,6 +2125,13 @@ document.addEventListener('keydown', function(e){
 .lrc-wa-icon .ic{font-size:30px}.lrc-wa-icon b{display:block;color:#075d6b;margin:4px 0 8px}
 .lrc-wa-tpl{border:1px dashed #b9d8cb;border-radius:12px;padding:10px 12px;margin-top:8px;background:#fbfefc;white-space:pre-line;line-height:1.8;font-size:13px;color:#2d4b51}
 .lrc-wa-tpl b{color:#128c4a}
+.lrc-wa-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px}
+.lrc-wa-stat{background:#f4faf6;border:1px solid #d5ece0;border-radius:14px;padding:10px 6px;text-align:center}
+.lrc-wa-stat b{display:block;font-size:22px;color:#128c4a;line-height:1.2}
+.lrc-wa-stat span{font-size:12px;color:#4d6a62}
+.lrc-wa-stat.main{background:#25d366;border-color:#1fb457}.lrc-wa-stat.main b,.lrc-wa-stat.main span{color:#fff}
+.lrc-wa-stat.bad b{color:#b42318}
+@media(max-width:560px){.lrc-wa-stats{grid-template-columns:repeat(2,1fr)}}
 #lrcWaLog table{width:100%;border-collapse:collapse;font-size:12.5px}
 #lrcWaLog th,#lrcWaLog td{border-bottom:1px solid #edf3f3;padding:7px 8px;text-align:right;vertical-align:top}
 #lrcWaLog th{background:#f3f8f8;color:#20444c;position:sticky;top:0}
@@ -2153,6 +2160,15 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
 
   <div id="lrcWaPanel" style="display:none">
    <div id="lrcWaStatus" class="lrc-wa-status">⏳ جارٍ قراءة حالة الخدمة...</div>
+   <div class="lrc-wa-stats" id="lrcWaStats">
+    <div class="lrc-wa-stat main"><b id="waStTotal">—</b><span>إجمالي الرسائل المرسلة</span></div>
+    <div class="lrc-wa-stat"><b id="waStToday">—</b><span>اليوم</span></div>
+    <div class="lrc-wa-stat"><b id="waStMonth">—</b><span>هذا الشهر</span></div>
+    <div class="lrc-wa-stat bad"><b id="waStFailed">—</b><span>تعذّر إرسالها</span></div>
+    <div class="lrc-wa-stat"><b id="waStBooking">—</b><span>📅 تأكيد حجز المركز</span></div>
+    <div class="lrc-wa-stat"><b id="waStRequest">—</b><span>📚 استلام طلب كتاب</span></div>
+    <div class="lrc-wa-stat"><b id="waStReady">—</b><span>✅ كتاب جاهز للاستلام</span></div>
+   </div>
    <div class="lrc-wa-icons">
     <div class="lrc-wa-icon"><div class="ic">🔑</div><b>Token</b><input id="lrcWaToken" type="password" autocomplete="off" dir="ltr" placeholder="Permanent Access Token"></div>
     <div class="lrc-wa-icon"><div class="ic">🆔</div><b>ID</b><input id="lrcWaPhoneId" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="Phone Number ID"></div>
@@ -2246,7 +2262,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    $('lrcWaEnabled').value=r.enabled===false?'0':'1';
    $('lrcWaTplBooking').value=r.tplBooking||'';$('lrcWaTplRequest').value=r.tplRequest||'';$('lrcWaTplReady').value=r.tplReady||'';$('lrcWaLang').value=r.lang||'ar';
    $('lrcWaVersion').textContent=r.version?('إصدار السكربت: '+r.version):'⚠️ السكربت المنشور قديم — انشر Code.gs الجديد بإصدار جديد.';
-   renderLog(r.log);
+   renderLog(r.log);renderStats(r.stats);
    if(r.configured)setStatus(r.enabled===false?'⏸️ الخدمة مُعدّة لكنها موقوفة مؤقتًا.':'✅ خدمة واتساب مفعّلة — تُرسل الرسائل تلقائيًا عند تأكيد الحجز، واستلام طلب الكتاب، وجاهزية الكتاب.','ok');
    else setStatus('⚪ الخدمة غير مفعّلة بعد — أدخل Token و ID ثم اضغط «حفظ وتفعيل».');
  }
@@ -2261,7 +2277,13 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    if(!Array.isArray(rows)||!rows.length){box.innerHTML='<div style="padding:14px;text-align:center;color:#60777b">لا توجد محاولات إرسال مسجلة بعد.</div>';return}
    box.innerHTML='<table><thead><tr><th>الوقت</th><th>الرقم</th><th>الرسالة</th><th>النتيجة</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.time)+'</td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.template)+'</td><td class="'+(x.ok?'ok':'bad')+'">'+(x.ok?'✅ قُبلت لدى Meta':'❌ '+esc(x.error))+(x.hint?'<br><small style="color:#7a5200;font-weight:700">💡 '+esc(x.hint)+'</small>':'')+'</td></tr>').join('')+'</tbody></table>';
  }
- window.loadWhatsAppLog=async function(){try{const r=await apiJSON({action:'waStatus',key:waKey});if(r&&r.ok)renderLog(r.log)}catch(e){}};
+ function renderStats(st){
+   const set=(id,v)=>{const el=$(id);if(el)el.textContent=(v==null?'—':v)};
+   st=st||{};
+   set('waStTotal',st.total);set('waStToday',st.today);set('waStMonth',st.month);set('waStFailed',st.failed);
+   set('waStBooking',st.booking);set('waStRequest',st.request);set('waStReady',st.ready);
+ }
+ window.loadWhatsAppLog=async function(){try{const r=await apiJSON({action:'waStatus',key:waKey});if(r&&r.ok){renderLog(r.log);renderStats(r.stats)}}catch(e){}};
  window.checkWhatsAppService=async function(){
    setStatus('⏳ جارٍ فحص Token و ID لدى Meta...');
    try{const r=await apiJSON({action:'waCheck',key:waKey});setStatus((r&&r.ok?'✅ ':'⚠️ ')+esc((r&&r.message)||'تعذر الفحص').replace(/\n/g,'<br>')+(r&&r.hint?'<br><small>💡 '+esc(r.hint)+'</small>':''),r&&r.ok?'ok':'bad')}
@@ -2289,9 +2311,10 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
  $('lrcWaModal').addEventListener('click',e=>{if(e.target.id==='lrcWaModal')closeWhatsAppService()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('lrcWaModal').classList.contains('show'))closeWhatsAppService()});
 
- /* ---------- تسجيل الزيارة إلزامي ---------- */
- const DONE='mawala_visit_registered_v3';
- const isDone=()=>{try{return sessionStorage.getItem(DONE)==='1'}catch(e){return false}};
+ /* ---------- تسجيل الزيارة إلزامي ويتجدد يوميًا ---------- */
+ // يُحفظ تاريخ آخر تسجيل على الجهاز؛ في كل يوم جديد يُطلب التسجيل من جديد.
+ const DONE='mawala_visit_registered_day_v4';
+ const isDone=()=>{try{return localStorage.getItem(DONE)===lrcToday()}catch(e){return false}};
  const notice=()=>$('visitWelcomeNotice');
  const visitsCount=()=>{try{return (JSON.parse(localStorage.getItem('mawala_lrc_visits_v1')||'[]')||[]).length}catch(e){return 0}};
  function requireVisit(){
@@ -2310,7 +2333,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    const before=visitsCount();
    origSave.apply(this,arguments);
    if(!isDone()&&visitsCount()>before){
-     try{sessionStorage.setItem(DONE,'1')}catch(e){}
+     try{localStorage.setItem(DONE,lrcToday())}catch(e){}
      document.body.classList.remove('lrc-visit-required');
      setTimeout(()=>{
        origClose();
@@ -2323,6 +2346,9 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
  const n=notice();
  if(n)new MutationObserver(()=>{if(!isDone()&&!n.classList.contains('show')){const m=$('interactiveVisitModal');if(!(m&&m.classList.contains('show')))setTimeout(requireVisit,30)}}).observe(n,{attributes:true,attributeFilter:['class','style']});
  if(document.readyState==='complete')setTimeout(requireVisit,400);else window.addEventListener('load',()=>setTimeout(requireVisit,400));
+ // إذا بقيت الصفحة مفتوحة حتى اليوم التالي يُطلب التسجيل تلقائيًا.
+ setInterval(()=>{if(!isDone())requireVisit()},60000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isDone())requireVisit()});
 })();
 </script>
 
