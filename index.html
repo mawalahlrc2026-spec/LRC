@@ -789,6 +789,7 @@ window.setVisitType=function(t,b){visitType=t;document.querySelectorAll('.vTab')
 .backup-btn.alt{background:#eef5f5;color:#075d6b;border:1px solid #bfd4d6}
 .backup-note{font-size:12px;color:#667;line-height:1.7;margin-top:10px}
 </style>
+<div class="lrc-designer-out">🎨 تصميم وبرمجة: <b>بدر بن حمود الرواحي</b> — أخصائي مصادر التعلم</div>
 <details class="backup-admin">
  <summary>🔐 النسخ الاحتياطي والاستعادة</summary>
  <div class="backup-actions">
@@ -1080,7 +1081,7 @@ async function confirmTrialBooking() {
     const o=document.getElementById('trialOk');
     if(o){
       o.style.display='block';
-      o.innerHTML='✅ تم تأكيد حجز <b>'+escBooking(chosenBeforeRequest)+'</b> للمعلم <b>'+escBooking(teacher)+'</b>، وأصبحت الحصة الآن <b>محجوزة 🔒</b>.'+(result.whatsapp&&result.whatsapp.sent?'<br>📲 تم إرسال رسالة التأكيد عبر واتساب.':'');
+      o.innerHTML='✅ تم تأكيد حجز <b>'+escBooking(chosenBeforeRequest)+'</b> للمعلم <b>'+escBooking(teacher)+'</b>، وأصبحت الحصة الآن <b>محجوزة 🔒</b>.'+(result.whatsapp?(result.whatsapp.sent?'<br>📲 تم إرسال رسالة التأكيد عبر واتساب.':'<br><small style="color:#8a5a00">⚠️ لم تُرسل رسالة واتساب، والحجز مؤكد.</small>'):'');
     }
     if(typeof loadLiveStats==='function')loadLiveStats();
     // إذا كانت نافذة التقارير مفتوحة، حدّث تقرير اليوم فورًا.
@@ -1397,7 +1398,7 @@ async function saveCentralBookRequest(){
     });
     if(!data.ok)throw new Error(data.message||'تعذر تسجيل طلب الكتاب');
     cbrMessage.style.color='#087665';
-    cbrMessage.innerHTML='✅ تم تسجيل طلب الكتاب بنجاح.'+(data.whatsapp&&data.whatsapp.sent?' 📲 تم إرسال رسالة عبر واتساب.':'')+
+    cbrMessage.innerHTML='✅ تم تسجيل طلب الكتاب بنجاح.'+(data.whatsapp?(data.whatsapp.sent?' 📲 تم إرسال رسالة عبر واتساب.':' <small style="color:#8a5a00">(لم تُرسل رسالة واتساب)</small>'):'')+
       (data.id?'<div class="request-number-box">رقم طلبك: <span dir="ltr">'+esc(data.id)+'</span><br><small>احتفظ بهذا الرقم لمتابعة حالة الكتاب.</small></div>':'');
     try{ await loadCentralBookRequests(); }catch(_e){} setTimeout(closeCentralBookRequest,1200);
   }catch(e){
@@ -1439,6 +1440,7 @@ async function updateCentralBookRequestStatus(id,status){
   try{
     const data=await apiJSON({action:'updateBookRequest',id,status});
     if(!data.ok)throw new Error(data.message||'تعذر تحديث الحالة');
+    if(data.whatsapp)alert(data.whatsapp.sent?'📲 تم إرسال رسالة «الكتاب جاهز للاستلام» عبر واتساب.':('⚠️ لم تُرسل رسالة واتساب: '+(data.whatsapp.error||'')));
     await loadCentralBookRequests();
   }catch(e){alert(e.message)}
 }
@@ -2098,6 +2100,9 @@ document.addEventListener('keydown', function(e){
 .lrc-date-badge{position:absolute;left:61.8%;top:1.9%;z-index:45;min-width:17%;padding:.45% 1.1%;border-radius:14px;background:rgba(255,255,255,.88);border:1px solid rgba(7,93,107,.18);box-shadow:0 4px 14px rgba(0,50,60,.12);text-align:center;direction:rtl;color:#0b4f5c;line-height:1.45;pointer-events:none;backdrop-filter:blur(2px)}
 .lrc-date-badge b{display:block;font-size:clamp(11px,1.05vw,17px);color:#075d6b}
 .lrc-date-badge span{display:block;font-size:clamp(9px,.78vw,13px);color:#3d6670}
+.lrc-designer-out{margin:22px auto 0;width:fit-content;max-width:94vw;direction:rtl;text-align:center;background:#fff;border:1px solid #dce8e8;border-radius:30px;padding:10px 22px;color:#36585f;font-size:15px;box-shadow:0 3px 12px rgba(0,50,60,.07)}
+.lrc-designer-out b{color:#075d6b}
+.lrc-designer-out + .backup-admin{margin-top:14px}
 .lrc-designer{position:absolute;left:50%;transform:translateX(-50%);bottom:.9%;z-index:45;white-space:nowrap;direction:rtl;color:#fff;font-size:clamp(9px,.82vw,13px);font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.45);background:rgba(4,60,70,.6);padding:.25% 1.2%;border-radius:20px;pointer-events:none}
 .lrc-wa-nav{position:absolute;left:29.3%;top:28.9%;width:6.8%;height:5.9%;z-index:46;border:0;border-radius:8px;cursor:pointer;background:linear-gradient(180deg,#f4f7f8 0%,#e6eef1 60%,#dbe8ed 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;color:#173f6b;font-weight:800;font-size:clamp(9px,.95vw,15px);padding:0}
 .lrc-wa-nav svg{width:clamp(14px,1.85vw,28px);height:clamp(14px,1.85vw,28px)}
@@ -2120,6 +2125,10 @@ document.addEventListener('keydown', function(e){
 .lrc-wa-icon .ic{font-size:30px}.lrc-wa-icon b{display:block;color:#075d6b;margin:4px 0 8px}
 .lrc-wa-tpl{border:1px dashed #b9d8cb;border-radius:12px;padding:10px 12px;margin-top:8px;background:#fbfefc;white-space:pre-line;line-height:1.8;font-size:13px;color:#2d4b51}
 .lrc-wa-tpl b{color:#128c4a}
+#lrcWaLog table{width:100%;border-collapse:collapse;font-size:12.5px}
+#lrcWaLog th,#lrcWaLog td{border-bottom:1px solid #edf3f3;padding:7px 8px;text-align:right;vertical-align:top}
+#lrcWaLog th{background:#f3f8f8;color:#20444c;position:sticky;top:0}
+#lrcWaLog .ok{color:#126b38;font-weight:800}#lrcWaLog .bad{color:#9b1c1c;font-weight:800}
 .lrc-phone-field{display:flex;align-items:center;gap:6px;border:1px solid #c4d7dc;border-radius:11px;background:#fff;padding:0 10px}
 .lrc-phone-field span{font-size:18px}.booking-side .lrc-phone-field input{border:0!important;padding:12px 4px!important;outline:none}
 .lrc-phone-hint{display:block;font-size:12px;color:#60777b;margin:4px 0 6px}
@@ -2176,9 +2185,12 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
     <label>رمز لغة القوالب</label><input id="lrcWaLang" dir="ltr" placeholder="ar">
    </details>
 
-   <div class="lrc-wa-row"><button type="button" class="main" onclick="saveWhatsAppService()">💾 حفظ وتفعيل</button></div>
+   <div class="lrc-wa-row"><button type="button" class="main" onclick="saveWhatsAppService()">💾 حفظ وتفعيل</button><button type="button" onclick="checkWhatsAppService()">🔍 فحص الاتصال بـ Meta</button></div>
    <label>إرسال رسالة تجريبية (قالب تأكيد الحجز)</label>
    <div style="display:flex;gap:8px"><input id="lrcWaTestPhone" type="tel" inputmode="numeric" dir="ltr" placeholder="91234567"><button type="button" onclick="testWhatsAppService()" style="font:inherit;font-weight:800;border-radius:11px;padding:0 16px;border:1px solid #1fb457;background:#e9f9ef;color:#126b38;cursor:pointer;white-space:nowrap">📤 إرسال</button></div>
+   <label style="display:flex;justify-content:space-between;align-items:center">📋 سجل آخر الرسائل <button type="button" onclick="loadWhatsAppLog()" style="font:inherit;font-size:13px;border:1px solid #bfd4d6;background:#f4f8f8;border-radius:9px;padding:4px 10px;cursor:pointer">↻ تحديث</button></label>
+   <div id="lrcWaLog" style="overflow:auto;max-height:260px;border:1px solid #e1ecec;border-radius:11px"></div>
+   <div id="lrcWaVersion" style="margin-top:8px;font-size:12px;color:#60777b"></div>
   </div>
  </div>
 </div>
@@ -2204,10 +2216,6 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    paint(); setInterval(paint,30000);
    document.addEventListener('visibilitychange',()=>{if(!document.hidden)paint()});
 
-   /* ---------- المصمم ---------- */
-   const d=document.createElement('div');d.className='lrc-designer';
-   d.textContent='تصميم وبرمجة: بدر بن حمود الرواحي — أخصائي مصادر التعلم';
-   stage.appendChild(d);
 
    /* ---------- خدمة واتساب مكان «عن المركز» ---------- */
    const b=document.createElement('button');b.type='button';b.className='lrc-wa-nav';b.title='خدمة واتساب';b.setAttribute('aria-label','خدمة واتساب');
@@ -2235,6 +2243,8 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    $('lrcWaToken').value='';$('lrcWaToken').placeholder=r.tokenMasked?('محفوظ '+r.tokenMasked):'Permanent Access Token';
    $('lrcWaEnabled').value=r.enabled===false?'0':'1';
    $('lrcWaTplBooking').value=r.tplBooking||'';$('lrcWaTplRequest').value=r.tplRequest||'';$('lrcWaTplReady').value=r.tplReady||'';$('lrcWaLang').value=r.lang||'ar';
+   $('lrcWaVersion').textContent=r.version?('إصدار السكربت: '+r.version):'⚠️ السكربت المنشور قديم — انشر Code.gs الجديد بإصدار جديد.';
+   renderLog(r.log);
    if(r.configured)setStatus(r.enabled===false?'⏸️ الخدمة مُعدّة لكنها موقوفة مؤقتًا.':'✅ خدمة واتساب مفعّلة — تُرسل الرسائل تلقائيًا عند تأكيد الحجز، واستلام طلب الكتاب، وجاهزية الكتاب.','ok');
    else setStatus('⚪ الخدمة غير مفعّلة بعد — أدخل Token و ID ثم اضغط «حفظ وتفعيل».');
  }
@@ -2243,6 +2253,18 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    try{const r=await apiJSON({action:'waStatus',key:waKey});if(!r||!r.ok)throw new Error((r&&r.message)||'تعذر قراءة الحالة');fill(r)}
    catch(e){setStatus('⚠️ '+e.message+'<br><small>تأكد من تحديث Apps Script ونشر إصدار جديد.</small>','bad')}
  }
+ function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+ function renderLog(rows){
+   const box=$('lrcWaLog'); if(!box)return;
+   if(!Array.isArray(rows)||!rows.length){box.innerHTML='<div style="padding:14px;text-align:center;color:#60777b">لا توجد محاولات إرسال مسجلة بعد.</div>';return}
+   box.innerHTML='<table><thead><tr><th>الوقت</th><th>الرقم</th><th>الرسالة</th><th>النتيجة</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.time)+'</td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.template)+'</td><td class="'+(x.ok?'ok':'bad')+'">'+(x.ok?'✅ قُبلت لدى Meta':'❌ '+esc(x.error))+(x.hint?'<br><small style="color:#7a5200;font-weight:700">💡 '+esc(x.hint)+'</small>':'')+'</td></tr>').join('')+'</tbody></table>';
+ }
+ window.loadWhatsAppLog=async function(){try{const r=await apiJSON({action:'waStatus',key:waKey});if(r&&r.ok)renderLog(r.log)}catch(e){}};
+ window.checkWhatsAppService=async function(){
+   setStatus('⏳ جارٍ فحص Token و ID لدى Meta...');
+   try{const r=await apiJSON({action:'waCheck',key:waKey});setStatus((r&&r.ok?'✅ ':'⚠️ ')+esc((r&&r.message)||'تعذر الفحص')+(r&&r.hint?'<br><small>💡 '+esc(r.hint)+'</small>':''),r&&r.ok?'ok':'bad')}
+   catch(e){setStatus('⚠️ تعذر الاتصال بالخدمة.','bad')}
+ };
  window.saveWhatsAppService=async function(){
    const token=$('lrcWaToken').value.trim(), phoneId=$('lrcWaPhoneId').value.trim();
    if(!phoneId){alert('أدخل Phone Number ID.');return}
@@ -2258,7 +2280,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    const phone=lrcNormPhone($('lrcWaTestPhone').value);
    if(!phone){alert('أدخل رقم هاتف صحيح.');return}
    setStatus('⏳ جارٍ إرسال رسالة تجريبية...');
-   try{const r=await apiJSON({action:'waTest',key:waKey,phone});setStatus((r&&r.ok?'✅ ':'⚠️ ')+((r&&r.message)||'تعذر الإرسال'),r&&r.ok?'ok':'bad')}
+   try{const r=await apiJSON({action:'waTest',key:waKey,phone});setStatus((r&&r.ok?'✅ ':'⚠️ ')+esc((r&&r.message)||'تعذر الإرسال')+(r&&r.hint?'<br><small>💡 '+esc(r.hint)+'</small>':''),r&&r.ok?'ok':'bad');loadWhatsAppLog()}
    catch(e){setStatus('⚠️ تعذر الاتصال بالخدمة.','bad')}
  };
  $('lrcWaPin').addEventListener('keydown',e=>{if(e.key==='Enter')unlockWhatsAppService()});
