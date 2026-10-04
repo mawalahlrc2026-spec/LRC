@@ -2157,31 +2157,33 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
     <div class="lrc-wa-icon"><div class="ic">🔑</div><b>Token</b><input id="lrcWaToken" type="password" autocomplete="off" dir="ltr" placeholder="Permanent Access Token"></div>
     <div class="lrc-wa-icon"><div class="ic">🆔</div><b>ID</b><input id="lrcWaPhoneId" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="Phone Number ID"></div>
    </div>
+   <div class="lrc-wa-icon" style="margin-top:12px"><div class="ic">🏢</div><b>WABA ID — معرّف حساب واتساب للأعمال</b><input id="lrcWaWabaId" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="WhatsApp Business Account ID"><small style="display:block;color:#60777b;margin-top:6px">من WhatsApp Manager ← الإعدادات، أو API Setup. يتيح للنظام قراءة متغيرات القوالب ومطابقتها تلقائيًا.</small></div>
    <small style="display:block;color:#60777b;margin-top:6px">يُحفظ Token في خصائص Apps Script وليس في الصفحة. اترك الحقل فارغًا للإبقاء على القيمة المحفوظة.</small>
    <label>حالة الإرسال التلقائي</label>
    <select id="lrcWaEnabled"><option value="1">مفعّل — إرسال الرسائل تلقائيًا</option><option value="0">موقوف مؤقتًا</option></select>
 
    <details style="margin-top:12px">
     <summary style="cursor:pointer;font-weight:800;color:#075d6b">📝 أسماء القوالب (Templates) كما في Meta Business</summary>
-    <label>قالب تأكيد حجز المركز</label><input id="lrcWaTplBooking" dir="ltr" placeholder="lrc_booking_confirmed">
-    <div class="lrc-wa-tpl"><b>تم تأكيد حجز مركز مصادر التعلم</b>
-الأستاذ/ {{1}}
-اليوم/ {{2}}
-التاريخ/ {{3}}
-الحصة/ {{4}}
-ملاحظة/ في حالة الرغبة في إلغاء الحصة الرجاء الدخول للنظام</div>
-    <label>قالب استلام طلب الكتاب</label><input id="lrcWaTplRequest" dir="ltr" placeholder="lrc_book_request_received">
-    <div class="lrc-wa-tpl"><b>تم استلام طلبكم للكتاب:</b>
-عنوان الكتاب/ {{1}}
-رقم الكتاب/ {{2}}
-سيتم إشعاركم عند جاهزية الكتاب للاستلام من مركز مصادر التعلم</div>
-    <label>قالب جاهزية الكتاب</label><input id="lrcWaTplReady" dir="ltr" placeholder="lrc_book_ready">
-    <div class="lrc-wa-tpl"><b>الكتاب جاهز للاستلام</b>
-عنوان الكتاب/ {{1}}
-رقم الكتاب/ {{2}}
-يمكنكم استلامه من مركز مصادر التعلم خلال أوقات الدوام المدرسي.
-مدة الاستعارة: 10 أيام من تاريخ الاستلام، ونأمل الالتزام بإعادة الكتاب في الموعد المحدد؛ لإتاحة الفرصة لبقية المستفيدين للاستفادة منه.
-نتمنى لكم قراءة ممتعة ومثمرة</div>
+    <label>قالب تأكيد حجز المركز</label><input id="lrcWaTplBooking" dir="ltr" placeholder="learning_center_booking_confirmation">
+    <div class="lrc-wa-tpl">السلام عليكم ورحمة الله وبركاته
+<b>تم تأكيد حجز مركز مصادر التعلم.</b>
+الأستاذ/ <b>{{1}}</b>
+اليوم: <b>{{2}}</b>
+التاريخ: <b>{{3}}</b>
+الحصة: <b>{{4}}</b>
+ملاحظة: في حالة الرغبة في إلغاء الحصة يرجى الدخول إلى النظام وإلغاء الحجز.</div>
+    <label>قالب استلام طلب الكتاب</label><input id="lrcWaTplRequest" dir="ltr" placeholder="book_request_received">
+    <div class="lrc-wa-tpl">السلام عليكم ورحمة الله وبركاته
+<b>تم استلام طلبكم للكتاب من مركز مصادر التعلم.</b>
+عنوان الكتاب: <b>{{1}}</b>
+رقم الكتاب: <b>{{2}}</b>
+سيتم إشعاركم عند جاهزية الكتاب للاستلام.</div>
+    <label>قالب جاهزية الكتاب</label><input id="lrcWaTplReady" dir="ltr" placeholder="book_ready_for_pickup">
+    <div class="lrc-wa-tpl">السلام عليكم ورحمة الله وبركاته
+<b>نفيدكم بأن الكتاب أصبح جاهزاً للاستلام من مركز مصادر التعلم.</b>
+عنوان الكتاب: <b>{{1}}</b>
+رقم الكتاب: <b>{{2}}</b>
+مدة الاستعارة: 10 أيام من تاريخ الاستلام.</div>
     <label>رمز لغة القوالب</label><input id="lrcWaLang" dir="ltr" placeholder="ar">
    </details>
 
@@ -2239,7 +2241,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    await loadStatus();
  };
  function fill(r){
-   $('lrcWaPhoneId').value=r.phoneId||'';
+   $('lrcWaPhoneId').value=r.phoneId||'';$('lrcWaWabaId').value=r.wabaId||'';
    $('lrcWaToken').value='';$('lrcWaToken').placeholder=r.tokenMasked?('محفوظ '+r.tokenMasked):'Permanent Access Token';
    $('lrcWaEnabled').value=r.enabled===false?'0':'1';
    $('lrcWaTplBooking').value=r.tplBooking||'';$('lrcWaTplRequest').value=r.tplRequest||'';$('lrcWaTplReady').value=r.tplReady||'';$('lrcWaLang').value=r.lang||'ar';
@@ -2262,7 +2264,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
  window.loadWhatsAppLog=async function(){try{const r=await apiJSON({action:'waStatus',key:waKey});if(r&&r.ok)renderLog(r.log)}catch(e){}};
  window.checkWhatsAppService=async function(){
    setStatus('⏳ جارٍ فحص Token و ID لدى Meta...');
-   try{const r=await apiJSON({action:'waCheck',key:waKey});setStatus((r&&r.ok?'✅ ':'⚠️ ')+esc((r&&r.message)||'تعذر الفحص')+(r&&r.hint?'<br><small>💡 '+esc(r.hint)+'</small>':''),r&&r.ok?'ok':'bad')}
+   try{const r=await apiJSON({action:'waCheck',key:waKey});setStatus((r&&r.ok?'✅ ':'⚠️ ')+esc((r&&r.message)||'تعذر الفحص').replace(/\n/g,'<br>')+(r&&r.hint?'<br><small>💡 '+esc(r.hint)+'</small>':''),r&&r.ok?'ok':'bad')}
    catch(e){setStatus('⚠️ تعذر الاتصال بالخدمة.','bad')}
  };
  window.saveWhatsAppService=async function(){
@@ -2271,7 +2273,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    setStatus('⏳ جارٍ الحفظ...');
    try{
      const r=await apiJSON({action:'waSave',key:waKey,token,phoneId,enabled:$('lrcWaEnabled').value,
-       tplBooking:$('lrcWaTplBooking').value.trim(),tplRequest:$('lrcWaTplRequest').value.trim(),tplReady:$('lrcWaTplReady').value.trim(),lang:$('lrcWaLang').value.trim()});
+       tplBooking:$('lrcWaTplBooking').value.trim(),tplRequest:$('lrcWaTplRequest').value.trim(),tplReady:$('lrcWaTplReady').value.trim(),lang:$('lrcWaLang').value.trim(),wabaId:$('lrcWaWabaId').value.trim()});
      if(!r||!r.ok)throw new Error((r&&r.message)||'تعذر الحفظ');
      fill(r); if(!r.configured)setStatus('⚠️ تم الحفظ، لكن Token غير محفوظ بعد — أدخله ثم احفظ.','bad');
    }catch(e){setStatus('⚠️ '+e.message,'bad')}
