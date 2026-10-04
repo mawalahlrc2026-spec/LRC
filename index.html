@@ -161,6 +161,9 @@ document.addEventListener('DOMContentLoaded',function(){
 function lrcToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 /* الرقم السري: نافذة حجوزات المركز + الحذف من السجل المركزي (نفس الرمز في Apps Script) */
 const LRC_ADMIN_KEY='2040';
+/* رقم هاتف عُماني/دولي بصيغة موحدة: 968XXXXXXXX، أو فارغ إن كان غير صحيح */
+function lrcNormPhone(v){let d=String(v??'').replace(/\D/g,'');if(!d)return '';if(d.startsWith('00'))d=d.slice(2);if(d.length===9&&d.startsWith('0'))d=d.slice(1);if(d.length===8)d='968'+d;return d.length>=10&&d.length<=15?d:''}
+function lrcDayName(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m)return '';return ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][new Date(+m[1],+m[2]-1,+m[3],12).getDay()]}
 function setBookingConnectionStatus(type,text){
  const s=document.getElementById('bookingConnectionStatus');if(!s)return;
  s.className=type;s.textContent=text;
@@ -419,7 +422,7 @@ function setBookingConnectionStatus(type,text){
       <option value="supervision">إشراف / زيارة تربوية</option>
       <option value="admin">اجتماع أو عمل إداري</option>
       <option value="other">استخدام آخر للمركز</option>
-    </select><label>اسم الحاجز *</label><input id="trialTeacher" placeholder="اكتب اسم المعلم / المشرف / الإداري"><div class="booking-two"><div><label>المادة / الصفة *</label><select id="trialSubject">
+    </select><label>اسم الحاجز *</label><input id="trialTeacher" placeholder="اكتب اسم المعلم / المشرف / الإداري"><label>📱 رقم الهاتف (واتساب) *</label><div class="lrc-phone-field"><span>📱</span><input id="trialPhone" type="tel" inputmode="numeric" maxlength="15" placeholder="مثال: 91234567" dir="ltr"></div><small class="lrc-phone-hint">تصلك رسالة تأكيد الحجز على واتساب، ويُستخدم الرقم عند إلغاء الحجز.</small><div class="booking-two"><div><label>المادة / الصفة *</label><select id="trialSubject">
       <option value="">اختر المادة الدراسية</option>
       <option>اللغة العربية</option>
       <option>اللغة الإنجليزية</option>
@@ -435,6 +438,7 @@ function setBookingConnectionStatus(type,text){
       <option>مصادر التعلم</option>
       <option>إداري</option>
       <option>أخصائي اجتماعي</option>
+      <option>فني مختبر</option>
       <option>أخرى</option>
     </select></div><div id="trialClassWrap"><label>الصف / الشعبة *</label><select id="trialGrade">
       <option value="">اختر الصف</option>
@@ -461,10 +465,11 @@ function setBookingConnectionStatus(type,text){
       <option>التدريب وورش العمل</option>
       <option>التعلم الذاتي</option>
       <option>مشروع أو بحث علمي</option>
+      <option>عقد اجتماع</option>
       <option>أخرى</option>
     </select><label>الاحتياجات والملاحظات</label><textarea id="trialNotes" rows="4" placeholder="أجهزة، برامج، مصادر محددة..."></textarea><div style="display:flex;justify-content:flex-end;margin:8px 0 14px"><button type="button" onclick="openBookingReports()" style="border:0;border-radius:12px;padding:10px 14px;background:#eef5f5;color:#075d6b;border:1px solid #bfd4d6;font-weight:800;cursor:pointer">🖨️ تقارير الحجوزات</button></div>
 <div id="trialSummary" class="booking-summary">اختر التاريخ والحصة أولًا</div><div class="booking-actions"><button class="btn confirm-booking" onclick="confirmTrialBooking()">✓ تأكيد الحجز</button><button class="reset-booking" onclick="resetTrialForm()">↻ إعادة تعيين</button></div><div id="trialOk" class="booking-ok"></div></aside></div>
-<div class="today-bookings"><div class="today-head"><h4>☷ حجوزات اليوم</h4><button onclick="renderTodayBookings()">↻ تحديث القائمة</button></div><div class="booking-table-wrap"><table><thead><tr><th>#</th><th>الحصة</th><th>اسم المعلم</th><th>المادة</th><th>الصف/الشعبة</th><th>الهدف من الحجز</th><th>الحالة</th></tr></thead><tbody id="todayBookingsBody"></tbody></table></div></div>
+<div class="today-bookings"><div class="today-head"><h4 id="todayBookingsTitle">☷ حجوزات اليوم</h4><button onclick="renderTodayBookings()">↻ تحديث القائمة</button></div><div class="booking-table-wrap"><table><thead><tr><th>#</th><th>الحصة</th><th>اسم المعلم</th><th>المادة</th><th>الصف/الشعبة</th><th>الهدف من الحجز</th><th>الحالة</th><th>إلغاء</th></tr></thead><tbody id="todayBookingsBody"></tbody></table></div></div>
 </div></div></div>
 <script>
 
@@ -672,7 +677,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 <option>الصف العاشر</option><option>الصف الحادي عشر</option><option>الصف الثاني عشر</option></select>
 <select id="vSection"><option value="">اختر الشعبة</option></select></div>
 <input id="vOrg" placeholder="الجهة / المسمى الوظيفي" style="display:none">
-   <select id="vPurpose"><option value="">اختر هدف الزيارة</option><option>القراءة والمطالعة</option><option>البحث وجمع المعلومات</option><option>استخدام الحاسب والإنترنت</option><option>الاستفادة من مصادر التعلم</option><option>تنفيذ حصة دراسية</option><option>تنفيذ مشغل</option><option>تنفيذ ورشة تدريبية</option><option>تنفيذ نشاط أو مهمة</option><option>اجتماع أو زيارة رسمية</option><option>أخرى</option></select>
+   <select id="vPurpose"><option value="">اختر هدف الزيارة</option><option>القراءة والمطالعة</option><option>البحث وجمع المعلومات</option><option>استخدام الحاسب والإنترنت</option><option>الاستفادة من مصادر التعلم</option><option>تنفيذ حصة دراسية</option><option>تنفيذ مشغل</option><option>تنفيذ ورشة تدريبية</option><option>تنفيذ نشاط أو مهمة</option><option>اجتماع أو زيارة رسمية</option><option>عقد اجتماع</option><option>حجز كتاب</option><option>حجز مصادر التعلم لحصة دراسية</option><option>أخرى</option></select>
    <select id="vChannel"><option value="">اختر قناة الاستفادة</option><option>حضوري - زيارة ميدانية للمركز</option><option>عبر أجهزة المركز</option><option>رقمي عن بُعد</option></select>
    <input id="vDate" type="date">
    <textarea class="vFull" id="vNotes" rows="2" placeholder="ملاحظات - اختياري"></textarea>
@@ -1021,7 +1026,7 @@ function updateBookingFields(){
     if(grade) grade.value='';
     if(section) section.value='';
     if(purpose){
-      const defaults={training:'التدريب وورش العمل',supervision:'أخرى',admin:'أخرى',other:'أخرى'};
+      const defaults={training:'التدريب وورش العمل',supervision:'أخرى',admin:'عقد اجتماع',other:'أخرى'};
       if(defaults[type]) purpose.value=defaults[type];
     }
   }
@@ -1037,9 +1042,11 @@ async function confirmTrialBooking() {
   let section=document.getElementById('trialSection').value.trim();
   const purpose=document.getElementById('trialPurpose').value;
   const notes=document.getElementById('trialNotes').value.trim();
+  const phone=lrcNormPhone(document.getElementById('trialPhone')?.value);
   if(!date||!teacher||!subject||!purpose){
     alert('يرجى استكمال التاريخ واسم الحاجز والمادة/الصفة والهدف من الحجز.');return
   }
+  if(!phone){alert('يرجى إدخال رقم هاتف صحيح (8 أرقام مثل 91234567).');document.getElementById('trialPhone')?.focus();return}
   if(bookingType==='student'&&(!grade||!section)){
     alert('يرجى اختيار الصف والشعبة للحجز المرتبط بالطلبة.');return
   }
@@ -1054,7 +1061,7 @@ async function confirmTrialBooking() {
       alert('عذرًا، تم حجز هذه الحصة بالفعل. اختر حصة أخرى.');
       await renderTrialSlots();return;
     }
-    const result=await apiJSON({action:'book',date,slot:chosenBeforeRequest,teacher,subject,grade,section,purpose,notes});
+    const result=await apiJSON({action:'book',date,slot:chosenBeforeRequest,teacher,subject,grade,section,purpose,notes,phone});
     if(!result.ok){
       alert(result.message||'تعذر تسجيل الحجز.');
       await renderTrialSlots();return;
@@ -1073,7 +1080,7 @@ async function confirmTrialBooking() {
     const o=document.getElementById('trialOk');
     if(o){
       o.style.display='block';
-      o.innerHTML='✅ تم تأكيد حجز <b>'+escBooking(chosenBeforeRequest)+'</b> للمعلم <b>'+escBooking(teacher)+'</b>، وأصبحت الحصة الآن <b>محجوزة 🔒</b>.';
+      o.innerHTML='✅ تم تأكيد حجز <b>'+escBooking(chosenBeforeRequest)+'</b> للمعلم <b>'+escBooking(teacher)+'</b>، وأصبحت الحصة الآن <b>محجوزة 🔒</b>.'+(result.whatsapp&&result.whatsapp.sent?'<br>📲 تم إرسال رسالة التأكيد عبر واتساب.':'');
     }
     if(typeof loadLiveStats==='function')loadLiveStats();
     // إذا كانت نافذة التقارير مفتوحة، حدّث تقرير اليوم فورًا.
@@ -1092,20 +1099,39 @@ async function confirmTrialBooking() {
 async function renderTodayBookings() {
   const body=document.getElementById('todayBookingsBody');
   if(!body)return;
-  const today=lrcToday();
-  body.innerHTML='<tr><td colspan="7">⏳ جاري تحميل حجوزات اليوم...</td></tr>';
+  const day=(document.getElementById('trialDate')?.value)||lrcToday();
+  const head=document.getElementById('todayBookingsTitle');
+  if(head)head.textContent=day===lrcToday()?'☷ حجوزات اليوم':('☷ حجوزات يوم '+lrcDayName(day)+' '+day);
+  body.innerHTML='<tr><td colspan="8">⏳ جاري تحميل الحجوزات...</td></tr>';
   try{
-    const rec=await fetchCentralBookings(today);
+    const rec=(await fetchCentralBookings(day)).slice().sort((a,b)=>trialNames.indexOf(a.slot)-trialNames.indexOf(b.slot));
     body.innerHTML=rec.length?rec.map((x,i)=>{
-      const gs=x.section?`${x.grade||'—'} / ${x.section}`:(x.grade||'—');
-      return `<tr><td>${i+1}</td><td>${escBooking(x.slot||'—')}</td><td>${escBooking(x.teacher||'—')}</td><td>${escBooking(x.subject||'—')}</td><td>${escBooking(gs)}</td><td>${escBooking(x.purpose||'—')}</td><td><span class="status-locked">🔒 محجوزة</span></td></tr>`;
-    }).join(''):'<tr><td colspan="7">لا توجد حجوزات مسجلة اليوم.</td></tr>';
-  }catch(e){body.innerHTML='<tr><td colspan="7" style="color:#a33">تعذر تحميل الحجوزات المركزية.</td></tr>'}
+      const gs=x.section&&x.section!=='—'?`${x.grade||'—'} / ${x.section}`:(x.grade||'—');
+      const tok=bookingDelToken(x).replace(/'/g,'');
+      return `<tr><td>${i+1}</td><td>${escBooking(x.slot||'—')}</td><td>${escBooking(x.teacher||'—')}</td><td>${escBooking(x.subject||'—')}</td><td>${escBooking(gs)}</td><td>${escBooking(x.purpose||'—')}</td><td><span class="status-locked">🔒 محجوزة</span></td><td><button type="button" class="lrc-cancel-btn" title="إلغاء الحجز" onclick="cancelCentralBooking('${escBooking(tok)}','${escBooking(x.slot||'')}','${escBooking(x.date||day)}')">✖ إلغاء</button></td></tr>`;
+    }).join(''):'<tr><td colspan="8">لا توجد حجوزات مسجلة في هذا اليوم.</td></tr>';
+  }catch(e){body.innerHTML='<tr><td colspan="8" style="color:#a33">تعذر تحميل الحجوزات المركزية.</td></tr>'}
+}
+
+/* إلغاء الحجز: يُطلب رقم الهاتف المسجل في الحجز (أو رمز الأخصائي) */
+async function cancelCentralBooking(token,slot,date){
+  if(!token)return;
+  const v=prompt('لإلغاء حجز «'+slot+'» بتاريخ '+date+'\nأدخل رقم الهاتف المسجل في الحجز:');
+  if(v===null)return;
+  if(!String(v).trim()){alert('يجب إدخال رقم الهاتف.');return}
+  try{
+    const r=await apiJSON({action:'cancelBooking',id:token,verify:String(v).trim()});
+    if(!r||!r.ok){alert((r&&r.message)||'تعذر إلغاء الحجز.');return}
+    try{bookingMirrorSave(bookingMirrorLoad().filter(x=>bookingDelToken(x)!==token&&String(x.id)!==token))}catch(_e){}
+    alert('✅ '+(r.message||'تم إلغاء الحجز.'));
+    await renderTrialSlots();
+    if(typeof loadLiveStats==='function')loadLiveStats();
+  }catch(e){alert('تعذر الاتصال بخدمة الحجز.')}
 }
 
 function resetTrialForm(){
   trialChosen='';
-  ['trialTeacher','trialNotes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  ['trialTeacher','trialNotes','trialPhone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   ['trialSubject','trialGrade','trialSection','trialPurpose','trialBookingType'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0});
   updateBookingFields();
   const ok=document.getElementById('trialOk');if(ok)ok.style.display='none';
@@ -1314,10 +1340,10 @@ function initTrialBooking(){
  <div class="cbr-book"><b id="cbrBookTitle">—</b><span id="cbrBookMeta">—</span></div>
  <div class="cbr-grid">
    <label>اسم المستفيد *<input id="cbrName" placeholder="اكتب الاسم"></label>
-   <label>الفئة *<select id="cbrType" onchange="toggleCbrGrade()"><option value="">اختر</option><option>طالب</option><option>معلم</option></select></label>
+   <label>الفئة *<select id="cbrType" onchange="toggleCbrGrade()"><option value="">اختر</option><option>طالب</option><option>معلم</option><option>ولي أمر</option><option>إداري</option><option>زائر خارجي</option></select></label>
    <label id="cbrGradeWrap">الصف *<select id="cbrGrade"><option value="">اختر الصف</option><option>الصف الخامس</option><option>الصف السادس</option><option>الصف السابع</option><option>الصف الثامن</option><option>الصف التاسع</option><option>الصف العاشر</option><option>الصف الحادي عشر</option><option>الصف الثاني عشر</option></select></label>
-   <label>رقم الهاتف للتواصل<input id="cbrPhone" type="tel" inputmode="numeric" placeholder="مثال: 91234567"></label>
-    <div style="grid-column:1/-1;font-size:12px;color:#60777b;margin-top:-4px">اختياري — يُستخدم للتواصل بشأن طلب الكتاب فقط، ويمكن للطالب إدخال رقم ولي الأمر.</div>
+   <label>📱 رقم الهاتف (واتساب) *<input id="cbrPhone" type="tel" inputmode="numeric" maxlength="15" placeholder="مثال: 91234567" dir="ltr"></label>
+    <div style="grid-column:1/-1;font-size:12px;color:#60777b;margin-top:-4px">إلزامي — تصلك عليه رسالة استلام الطلب ورسالة جاهزية الكتاب عبر واتساب، ويمكن للطالب إدخال رقم ولي الأمر.</div>
     <label>ملاحظات<input id="cbrNotes" placeholder="اختياري"></label>
  </div>
  <div style="margin-top:14px"><button class="cbr-btn" id="cbrSaveBtn" onclick="saveCentralBookRequest()">تأكيد طلب الكتاب</button></div>
@@ -1351,12 +1377,13 @@ function openCentralBookRequest(bookId){
   centralBookRequestModal.classList.add('show');
 }
 function closeCentralBookRequest(){centralBookRequestModal.classList.remove('show')}
-function toggleCbrGrade(){cbrGradeWrap.style.display=cbrType.value==='معلم'?'none':'block'}
+function toggleCbrGrade(){cbrGradeWrap.style.display=(cbrType.value===''||cbrType.value==='طالب')?'block':'none'}
 
 async function saveCentralBookRequest(){
   if(!cbrSelectedBook)return;
   const name=cbrName.value.trim(), type=cbrType.value, grade=cbrGrade.value, phone=cbrPhone.value.trim(), notes=cbrNotes.value.trim();
   if(!name||!type||(type==='طالب'&&!grade)){alert('يرجى استكمال اسم المستفيد والفئة والصف للطالب.');return}
+  if(!lrcNormPhone(phone)){alert('يرجى إدخال رقم هاتف صحيح (8 أرقام مثل 91234567).');cbrPhone.focus();return}
   const btn=cbrSaveBtn;btn.disabled=true;btn.textContent='⏳ جارٍ تسجيل الطلب...';
   try{
     const data=await apiJSON({
@@ -1366,11 +1393,11 @@ async function saveCentralBookRequest(){
       classNo:cbrSelectedBook.class||'',
       requestNo:cbrSelectedBook.request||'',
       author:cbrSelectedBook.author||'',
-      name,type,grade:type==='طالب'?grade:'—',phone,notes
+      name,type,grade:type==='طالب'?grade:'—',phone:lrcNormPhone(phone),notes
     });
     if(!data.ok)throw new Error(data.message||'تعذر تسجيل طلب الكتاب');
     cbrMessage.style.color='#087665';
-    cbrMessage.innerHTML='✅ تم تسجيل طلب الكتاب بنجاح.'+
+    cbrMessage.innerHTML='✅ تم تسجيل طلب الكتاب بنجاح.'+(data.whatsapp&&data.whatsapp.sent?' 📲 تم إرسال رسالة عبر واتساب.':'')+
       (data.id?'<div class="request-number-box">رقم طلبك: <span dir="ltr">'+esc(data.id)+'</span><br><small>احتفظ بهذا الرقم لمتابعة حالة الكتاب.</small></div>':'');
     try{ await loadCentralBookRequests(); }catch(_e){} setTimeout(closeCentralBookRequest,1200);
   }catch(e){
@@ -2011,50 +2038,15 @@ document.addEventListener('keydown', function(e){
   <div class="visit-welcome-card">
     <div class="visit-welcome-icon">👋</div>
     <h2 id="visitWelcomeTitle">مرحبًا بكم في بوابة مركز مصادر التعلم</h2>
-    <p>للاستفادة من خدمات البوابة، يرجى أولًا تسجيل زيارتكم في <b>سجل زوار المركز</b>؛ وذلك لأغراض توثيق الاستفادة وتطوير خدمات المركز.</p>
+    <p>للاستفادة من خدمات البوابة، يجب أولًا تسجيل زيارتكم في <b>سجل زوار المركز</b>؛ وذلك لأغراض توثيق الاستفادة وتطوير خدمات المركز.</p><div class="visit-welcome-required">⚠️ تسجيل الزيارة إلزامي، ولا يمكن استخدام خدمات البوابة قبل إتمامه.</div>
     <div class="visit-welcome-actions">
       <button type="button" class="visit-welcome-primary" onclick="startVisitRegistration()">📝 تسجيل الزيارة الآن</button>
-      <button type="button" class="visit-welcome-secondary" onclick="closeVisitWelcomeNotice()">إغلاق</button>
     </div>
   </div>
 </div>
 
 
-<script>
-(function(){
-  const SESSION_KEY='mawala_visit_welcome_seen_v1';
 
-  window.closeVisitWelcomeNotice=function(){
-    const n=document.getElementById('visitWelcomeNotice');
-    if(n)n.classList.remove('show');
-    try{sessionStorage.setItem(SESSION_KEY,'1')}catch(e){}
-  };
-
-  window.startVisitRegistration=function(){
-    const n=document.getElementById('visitWelcomeNotice');
-    if(n)n.classList.remove('show');
-    try{sessionStorage.setItem(SESSION_KEY,'1')}catch(e){}
-    if(typeof window.openInteractiveVisitModal==='function'){
-      window.openInteractiveVisitModal();
-      return;
-    }
-    const target=document.querySelector('[onclick*="openInteractiveVisitModal"]');
-    if(target){target.click();return;}
-    alert('يرجى فتح سجل زوار المركز وتسجيل الزيارة.');
-  };
-
-  window.addEventListener('load',function(){
-    let seen=false;
-    try{seen=sessionStorage.getItem(SESSION_KEY)==='1'}catch(e){}
-    if(!seen){
-      setTimeout(function(){
-        const n=document.getElementById('visitWelcomeNotice');
-        if(n)n.classList.add('show');
-      },450);
-    }
-  });
-})();
-</script>
 
 <style id="booking-pin-style">
 #bookingPinGate{display:none;position:fixed;inset:0;z-index:900000;background:rgba(4,40,50,.62);align-items:center;justify-content:center;padding:16px;direction:rtl;font-family:inherit}
@@ -2097,6 +2089,216 @@ document.addEventListener('keydown', function(e){
   document.getElementById('bookingPinCancel').addEventListener('click',close);
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')tryOpen();if(e.key==='Escape')close()});
   gate.addEventListener('click',e=>{if(e.target===gate)close()});
+})();
+</script>
+
+
+<!-- ===== التاريخ اليومي + المصمم + خدمة واتساب + إلزامية تسجيل الزيارة ===== -->
+<style id="lrc-v3-style">
+.lrc-date-badge{position:absolute;left:61.8%;top:1.9%;z-index:45;min-width:17%;padding:.45% 1.1%;border-radius:14px;background:rgba(255,255,255,.88);border:1px solid rgba(7,93,107,.18);box-shadow:0 4px 14px rgba(0,50,60,.12);text-align:center;direction:rtl;color:#0b4f5c;line-height:1.45;pointer-events:none;backdrop-filter:blur(2px)}
+.lrc-date-badge b{display:block;font-size:clamp(11px,1.05vw,17px);color:#075d6b}
+.lrc-date-badge span{display:block;font-size:clamp(9px,.78vw,13px);color:#3d6670}
+.lrc-designer{position:absolute;left:50%;transform:translateX(-50%);bottom:.9%;z-index:45;white-space:nowrap;direction:rtl;color:#fff;font-size:clamp(9px,.82vw,13px);font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.45);background:rgba(4,60,70,.6);padding:.25% 1.2%;border-radius:20px;pointer-events:none}
+.lrc-wa-nav{position:absolute;left:29.3%;top:28.9%;width:6.8%;height:5.9%;z-index:46;border:0;border-radius:8px;cursor:pointer;background:linear-gradient(180deg,#f4f7f8 0%,#e6eef1 60%,#dbe8ed 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-family:inherit;color:#173f6b;font-weight:800;font-size:clamp(9px,.95vw,15px);padding:0}
+.lrc-wa-nav svg{width:clamp(14px,1.85vw,28px);height:clamp(14px,1.85vw,28px)}
+.lrc-wa-nav:hover,.lrc-wa-nav:focus-visible{background:linear-gradient(180deg,#eefaf2,#d7f0df);outline:2px solid rgba(37,211,102,.45)}
+#lrcWaModal{display:none;position:fixed;inset:0;z-index:850000;background:rgba(4,40,50,.62);align-items:center;justify-content:center;padding:16px;direction:rtl;overflow:auto}
+#lrcWaModal.show{display:flex}
+.lrc-wa-box{background:#fff;border-radius:22px;width:min(96vw,640px);max-height:94vh;overflow:auto;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.lrc-wa-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.lrc-wa-head h2{margin:0;color:#128c4a;font-size:22px;display:flex;align-items:center;gap:8px}
+.lrc-wa-close{border:0;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:20px;background:#f0f4f4}
+.lrc-wa-box label{display:block;font-weight:800;color:#20444c;margin:12px 0 6px}
+.lrc-wa-box input,.lrc-wa-box select{width:100%;box-sizing:border-box;font:inherit;padding:11px 12px;border:1px solid #c4d7dc;border-radius:11px;background:#fff}
+.lrc-wa-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.lrc-wa-row button{flex:1;min-width:140px;font:inherit;font-weight:800;border-radius:12px;padding:11px;cursor:pointer;border:1px solid #bfd4d6;background:#f4f8f8;color:#20444c}
+.lrc-wa-row button.main{background:#25d366;border-color:#1fb457;color:#fff}
+.lrc-wa-status{margin-top:10px;padding:10px 12px;border-radius:11px;background:#f3f8f8;color:#33555c;font-weight:700;line-height:1.7}
+.lrc-wa-status.ok{background:#e9f9ef;color:#126b38}.lrc-wa-status.bad{background:#fdecec;color:#9b1c1c}
+.lrc-wa-icons{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.lrc-wa-icon{border:1px solid #d6e9e4;border-radius:16px;padding:14px;background:#f8fcfb;text-align:center}
+.lrc-wa-icon .ic{font-size:30px}.lrc-wa-icon b{display:block;color:#075d6b;margin:4px 0 8px}
+.lrc-wa-tpl{border:1px dashed #b9d8cb;border-radius:12px;padding:10px 12px;margin-top:8px;background:#fbfefc;white-space:pre-line;line-height:1.8;font-size:13px;color:#2d4b51}
+.lrc-wa-tpl b{color:#128c4a}
+.lrc-phone-field{display:flex;align-items:center;gap:6px;border:1px solid #c4d7dc;border-radius:11px;background:#fff;padding:0 10px}
+.lrc-phone-field span{font-size:18px}.booking-side .lrc-phone-field input{border:0!important;padding:12px 4px!important;outline:none}
+.lrc-phone-hint{display:block;font-size:12px;color:#60777b;margin:4px 0 6px}
+.lrc-cancel-btn{border:0;border-radius:9px;padding:6px 10px;background:#fde2e2;color:#9b1c1c;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap}
+.lrc-cancel-btn:hover{background:#fbcaca}
+.visit-welcome-required{margin:-6px auto 16px;max-width:440px;background:#fff6e5;border:1px solid #f3d38b;color:#7a5200;border-radius:12px;padding:9px 12px;font-weight:800;font-size:14px}
+.lrc-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:999999;background:#0b6b5c;color:#fff;padding:12px 20px;border-radius:14px;font-weight:800;box-shadow:0 10px 30px rgba(0,0,0,.25);direction:rtl}
+body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
+</style>
+
+<div id="lrcWaModal" role="dialog" aria-modal="true" aria-labelledby="lrcWaTitle">
+ <div class="lrc-wa-box">
+  <div class="lrc-wa-head"><h2 id="lrcWaTitle"><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path fill="#25D366" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-1.9c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3z"/><path fill="#fff" d="M23.1 19.3c-.4-.2-2.3-1.1-2.6-1.2-.4-.1-.6-.2-.9.2-.3.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.6.1-.3.1-.5 0-.7-.1-.2-.9-2.1-1.2-2.9-.3-.8-.6-.6-.9-.7h-.7c-.3 0-.7.1-1 .5-.4.4-1.4 1.3-1.4 3.2s1.4 3.7 1.6 4c.2.3 2.7 4.2 6.6 5.8 3.3 1.3 3.9 1 4.6 1 .7-.1 2.3-.9 2.6-1.8.3-.9.3-1.7.2-1.8-.1-.3-.4-.4-.8-.5z"/></svg> خدمة واتساب</h2><button type="button" class="lrc-wa-close" onclick="closeWhatsAppService()" aria-label="إغلاق">×</button></div>
+
+  <div id="lrcWaLock">
+   <div style="text-align:center;font-size:40px">🔐</div>
+   <label for="lrcWaPin" style="text-align:center">أدخل الرقم السري لخدمة واتساب</label>
+   <input id="lrcWaPin" type="password" inputmode="numeric" maxlength="10" autocomplete="off" style="text-align:center;font-size:22px;letter-spacing:8px;direction:ltr">
+   <div id="lrcWaPinErr" style="color:#b42318;min-height:20px;margin-top:8px;text-align:center"></div>
+   <div class="lrc-wa-row"><button type="button" class="main" onclick="unlockWhatsAppService()">دخول</button></div>
+  </div>
+
+  <div id="lrcWaPanel" style="display:none">
+   <div id="lrcWaStatus" class="lrc-wa-status">⏳ جارٍ قراءة حالة الخدمة...</div>
+   <div class="lrc-wa-icons">
+    <div class="lrc-wa-icon"><div class="ic">🔑</div><b>Token</b><input id="lrcWaToken" type="password" autocomplete="off" dir="ltr" placeholder="Permanent Access Token"></div>
+    <div class="lrc-wa-icon"><div class="ic">🆔</div><b>ID</b><input id="lrcWaPhoneId" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="Phone Number ID"></div>
+   </div>
+   <small style="display:block;color:#60777b;margin-top:6px">يُحفظ Token في خصائص Apps Script وليس في الصفحة. اترك الحقل فارغًا للإبقاء على القيمة المحفوظة.</small>
+   <label>حالة الإرسال التلقائي</label>
+   <select id="lrcWaEnabled"><option value="1">مفعّل — إرسال الرسائل تلقائيًا</option><option value="0">موقوف مؤقتًا</option></select>
+
+   <details style="margin-top:12px">
+    <summary style="cursor:pointer;font-weight:800;color:#075d6b">📝 أسماء القوالب (Templates) كما في Meta Business</summary>
+    <label>قالب تأكيد حجز المركز</label><input id="lrcWaTplBooking" dir="ltr" placeholder="lrc_booking_confirmed">
+    <div class="lrc-wa-tpl"><b>تم تأكيد حجز مركز مصادر التعلم</b>
+الأستاذ/ {{1}}
+اليوم/ {{2}}
+التاريخ/ {{3}}
+الحصة/ {{4}}
+ملاحظة/ في حالة الرغبة في إلغاء الحصة الرجاء الدخول للنظام</div>
+    <label>قالب استلام طلب الكتاب</label><input id="lrcWaTplRequest" dir="ltr" placeholder="lrc_book_request_received">
+    <div class="lrc-wa-tpl"><b>تم استلام طلبكم للكتاب:</b>
+عنوان الكتاب/ {{1}}
+رقم الكتاب/ {{2}}
+سيتم إشعاركم عند جاهزية الكتاب للاستلام من مركز مصادر التعلم</div>
+    <label>قالب جاهزية الكتاب</label><input id="lrcWaTplReady" dir="ltr" placeholder="lrc_book_ready">
+    <div class="lrc-wa-tpl"><b>الكتاب جاهز للاستلام</b>
+عنوان الكتاب/ {{1}}
+رقم الكتاب/ {{2}}
+يمكنكم استلامه من مركز مصادر التعلم خلال أوقات الدوام المدرسي.
+مدة الاستعارة: 10 أيام من تاريخ الاستلام، ونأمل الالتزام بإعادة الكتاب في الموعد المحدد؛ لإتاحة الفرصة لبقية المستفيدين للاستفادة منه.
+نتمنى لكم قراءة ممتعة ومثمرة</div>
+    <label>رمز لغة القوالب</label><input id="lrcWaLang" dir="ltr" placeholder="ar">
+   </details>
+
+   <div class="lrc-wa-row"><button type="button" class="main" onclick="saveWhatsAppService()">💾 حفظ وتفعيل</button></div>
+   <label>إرسال رسالة تجريبية (قالب تأكيد الحجز)</label>
+   <div style="display:flex;gap:8px"><input id="lrcWaTestPhone" type="tel" inputmode="numeric" dir="ltr" placeholder="91234567"><button type="button" onclick="testWhatsAppService()" style="font:inherit;font-weight:800;border-radius:11px;padding:0 16px;border:1px solid #1fb457;background:#e9f9ef;color:#126b38;cursor:pointer;white-space:nowrap">📤 إرسال</button></div>
+  </div>
+ </div>
+</div>
+
+<script id="lrc-v3-js">
+(function(){
+ const stage=document.querySelector('.portal-stage');
+
+ /* ---------- التاريخ اليومي ---------- */
+ if(stage){
+   const badge=document.createElement('div');badge.className='lrc-date-badge';badge.id='lrcDateBadge';badge.setAttribute('aria-live','polite');
+   stage.appendChild(badge);
+   let last='';
+   const paint=()=>{
+     const now=new Date(), key=lrcToday();
+     if(key===last)return; last=key;
+     const day=now.toLocaleDateString('ar-OM',{weekday:'long'});
+     const greg=now.toLocaleDateString('ar-OM',{day:'numeric',month:'long',year:'numeric'});
+     let hijri='';
+     try{hijri=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(now)}catch(e){}
+     badge.innerHTML='<b>📅 '+day+'</b><span>'+greg+' م'+(hijri?' &nbsp;|&nbsp; '+hijri.replace(/\s*هـ$/,'')+' هـ':'')+'</span>';
+   };
+   paint(); setInterval(paint,30000);
+   document.addEventListener('visibilitychange',()=>{if(!document.hidden)paint()});
+
+   /* ---------- المصمم ---------- */
+   const d=document.createElement('div');d.className='lrc-designer';
+   d.textContent='تصميم وبرمجة: بدر بن حمود الرواحي — أخصائي مصادر التعلم';
+   stage.appendChild(d);
+
+   /* ---------- خدمة واتساب مكان «عن المركز» ---------- */
+   const b=document.createElement('button');b.type='button';b.className='lrc-wa-nav';b.title='خدمة واتساب';b.setAttribute('aria-label','خدمة واتساب');
+   b.innerHTML='<svg viewBox="0 0 32 32" aria-hidden="true"><path fill="#25D366" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-1.9c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3z"/><path fill="#fff" d="M23.1 19.3c-.4-.2-2.3-1.1-2.6-1.2-.4-.1-.6-.2-.9.2-.3.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1-.4-.2-1.6-.6-3-1.9-1.1-1-1.9-2.2-2.1-2.6-.2-.4 0-.6.2-.8l.6-.7c.2-.2.3-.4.4-.6.1-.3.1-.5 0-.7-.1-.2-.9-2.1-1.2-2.9-.3-.8-.6-.6-.9-.7h-.7c-.3 0-.7.1-1 .5-.4.4-1.4 1.3-1.4 3.2s1.4 3.7 1.6 4c.2.3 2.7 4.2 6.6 5.8 3.3 1.3 3.9 1 4.6 1 .7-.1 2.3-.9 2.6-1.8.3-.9.3-1.7.2-1.8-.1-.3-.4-.4-.8-.5z"/></svg><span>خدمة واتساب</span>';
+   b.addEventListener('click',()=>openWhatsAppService());
+   stage.appendChild(b);
+ }
+
+ /* ---------- لوحة خدمة واتساب ---------- */
+ const WA_PIN='880635'; let waKey='';
+ const $=id=>document.getElementById(id);
+ function setStatus(t,cls){const s=$('lrcWaStatus');s.className='lrc-wa-status'+(cls?' '+cls:'');s.innerHTML=t}
+ window.openWhatsAppService=function(){
+   waKey='';$('lrcWaLock').style.display='block';$('lrcWaPanel').style.display='none';
+   $('lrcWaPin').value='';$('lrcWaPinErr').textContent='';$('lrcWaModal').classList.add('show');setTimeout(()=>$('lrcWaPin').focus(),60);
+ };
+ window.closeWhatsAppService=function(){$('lrcWaModal').classList.remove('show');waKey='';$('lrcWaToken').value=''};
+ window.unlockWhatsAppService=async function(){
+   if($('lrcWaPin').value.trim()!==WA_PIN){$('lrcWaPinErr').textContent='الرقم السري غير صحيح';$('lrcWaPin').value='';$('lrcWaPin').focus();return}
+   waKey=WA_PIN;$('lrcWaLock').style.display='none';$('lrcWaPanel').style.display='block';
+   await loadStatus();
+ };
+ function fill(r){
+   $('lrcWaPhoneId').value=r.phoneId||'';
+   $('lrcWaToken').value='';$('lrcWaToken').placeholder=r.tokenMasked?('محفوظ '+r.tokenMasked):'Permanent Access Token';
+   $('lrcWaEnabled').value=r.enabled===false?'0':'1';
+   $('lrcWaTplBooking').value=r.tplBooking||'';$('lrcWaTplRequest').value=r.tplRequest||'';$('lrcWaTplReady').value=r.tplReady||'';$('lrcWaLang').value=r.lang||'ar';
+   if(r.configured)setStatus(r.enabled===false?'⏸️ الخدمة مُعدّة لكنها موقوفة مؤقتًا.':'✅ خدمة واتساب مفعّلة — تُرسل الرسائل تلقائيًا عند تأكيد الحجز، واستلام طلب الكتاب، وجاهزية الكتاب.','ok');
+   else setStatus('⚪ الخدمة غير مفعّلة بعد — أدخل Token و ID ثم اضغط «حفظ وتفعيل».');
+ }
+ async function loadStatus(){
+   setStatus('⏳ جارٍ قراءة حالة الخدمة...');
+   try{const r=await apiJSON({action:'waStatus',key:waKey});if(!r||!r.ok)throw new Error((r&&r.message)||'تعذر قراءة الحالة');fill(r)}
+   catch(e){setStatus('⚠️ '+e.message+'<br><small>تأكد من تحديث Apps Script ونشر إصدار جديد.</small>','bad')}
+ }
+ window.saveWhatsAppService=async function(){
+   const token=$('lrcWaToken').value.trim(), phoneId=$('lrcWaPhoneId').value.trim();
+   if(!phoneId){alert('أدخل Phone Number ID.');return}
+   setStatus('⏳ جارٍ الحفظ...');
+   try{
+     const r=await apiJSON({action:'waSave',key:waKey,token,phoneId,enabled:$('lrcWaEnabled').value,
+       tplBooking:$('lrcWaTplBooking').value.trim(),tplRequest:$('lrcWaTplRequest').value.trim(),tplReady:$('lrcWaTplReady').value.trim(),lang:$('lrcWaLang').value.trim()});
+     if(!r||!r.ok)throw new Error((r&&r.message)||'تعذر الحفظ');
+     fill(r); if(!r.configured)setStatus('⚠️ تم الحفظ، لكن Token غير محفوظ بعد — أدخله ثم احفظ.','bad');
+   }catch(e){setStatus('⚠️ '+e.message,'bad')}
+ };
+ window.testWhatsAppService=async function(){
+   const phone=lrcNormPhone($('lrcWaTestPhone').value);
+   if(!phone){alert('أدخل رقم هاتف صحيح.');return}
+   setStatus('⏳ جارٍ إرسال رسالة تجريبية...');
+   try{const r=await apiJSON({action:'waTest',key:waKey,phone});setStatus((r&&r.ok?'✅ ':'⚠️ ')+((r&&r.message)||'تعذر الإرسال'),r&&r.ok?'ok':'bad')}
+   catch(e){setStatus('⚠️ تعذر الاتصال بالخدمة.','bad')}
+ };
+ $('lrcWaPin').addEventListener('keydown',e=>{if(e.key==='Enter')unlockWhatsAppService()});
+ $('lrcWaModal').addEventListener('click',e=>{if(e.target.id==='lrcWaModal')closeWhatsAppService()});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('lrcWaModal').classList.contains('show'))closeWhatsAppService()});
+
+ /* ---------- تسجيل الزيارة إلزامي ---------- */
+ const DONE='mawala_visit_registered_v3';
+ const isDone=()=>{try{return sessionStorage.getItem(DONE)==='1'}catch(e){return false}};
+ const notice=()=>$('visitWelcomeNotice');
+ const visitsCount=()=>{try{return (JSON.parse(localStorage.getItem('mawala_lrc_visits_v1')||'[]')||[]).length}catch(e){return 0}};
+ function requireVisit(){
+   if(isDone())return;
+   document.body.classList.add('lrc-visit-required');
+   const m=$('interactiveVisitModal');
+   if(m&&m.classList.contains('show'))return;
+   const n=notice();if(n)n.classList.add('show');
+ }
+ window.closeVisitWelcomeNotice=function(){if(isDone()){const n=notice();if(n)n.classList.remove('show')}};
+ window.startVisitRegistration=function(){const n=notice();if(n)n.classList.remove('show');openInteractiveVisitModal()};
+ const origClose=window.closeInteractiveVisitModal;
+ window.closeInteractiveVisitModal=function(){origClose.apply(this,arguments);if(!isDone())setTimeout(requireVisit,30)};
+ const origSave=window.saveVisit;
+ window.saveVisit=function(){
+   const before=visitsCount();
+   origSave.apply(this,arguments);
+   if(!isDone()&&visitsCount()>before){
+     try{sessionStorage.setItem(DONE,'1')}catch(e){}
+     document.body.classList.remove('lrc-visit-required');
+     setTimeout(()=>{
+       origClose();
+       const t=document.createElement('div');t.className='lrc-toast';t.textContent='✅ تم تسجيل زيارتك — مرحبًا بك في بوابة مركز مصادر التعلم';
+       document.body.appendChild(t);setTimeout(()=>t.remove(),3200);
+     },1100);
+   }
+ };
+ // أي محاولة لإخفاء الترحيبية قبل التسجيل تُعيد إظهارها.
+ const n=notice();
+ if(n)new MutationObserver(()=>{if(!isDone()&&!n.classList.contains('show')){const m=$('interactiveVisitModal');if(!(m&&m.classList.contains('show')))setTimeout(requireVisit,30)}}).observe(n,{attributes:true,attributeFilter:['class','style']});
+ if(document.readyState==='complete')setTimeout(requireVisit,400);else window.addEventListener('load',()=>setTimeout(requireVisit,400));
 })();
 </script>
 
