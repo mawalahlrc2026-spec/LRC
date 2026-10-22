@@ -422,25 +422,17 @@ function setBookingConnectionStatus(type,text){
       <option value="supervision">إشراف / زيارة تربوية</option>
       <option value="admin">اجتماع أو عمل إداري</option>
       <option value="other">استخدام آخر للمركز</option>
-    </select><label>اسم الحاجز *</label><input id="trialTeacher" placeholder="اكتب اسم المعلم / المشرف / الإداري"><label>📱 رقم الهاتف (واتساب) *</label><div class="lrc-phone-field"><span>📱</span><input id="trialPhone" type="tel" inputmode="numeric" maxlength="15" placeholder="مثال: 91234567" dir="ltr"></div><small class="lrc-phone-hint">تصلك رسالة تأكيد الحجز على واتساب، ويُستخدم الرقم عند إلغاء الحجز.</small><div class="booking-two"><div><label>المادة / الصفة *</label><select id="trialSubject">
-      <option value="">اختر المادة الدراسية</option>
-      <option>اللغة العربية</option>
-      <option>اللغة الإنجليزية</option>
-      <option>الرياضيات</option>
-      <option>العلوم</option>
-      <option>الدراسات الاجتماعية</option>
-      <option>التربية الإسلامية</option>
-      <option>تقنية المعلومات</option>
-      <option>المهارات الحياتية</option>
-      <option>الفنون التشكيلية</option>
-      <option>المهارات الموسيقية</option>
-      <option>الرياضة المدرسية</option>
-      <option>مصادر التعلم</option>
-      <option>إداري</option>
-      <option>أخصائي اجتماعي</option>
-      <option>فني مختبر</option>
-      <option>أخرى</option>
-    </select></div><div id="trialClassWrap"><label>الصف / الشعبة *</label><select id="trialGrade">
+    </select><label>اسم الحاجز *</label><input id="trialTeacher" placeholder="اكتب اسم المعلم / المشرف / الإداري"><label>📱 رقم الهاتف (واتساب) *</label><div class="lrc-phone-field"><span>📱</span><input id="trialPhone" type="tel" inputmode="numeric" maxlength="15" placeholder="مثال: 91234567" dir="ltr"></div><small class="lrc-phone-hint">تصلك رسالة تأكيد الحجز على واتساب، ويُستخدم الرقم عند إلغاء الحجز.</small><div class="booking-two"><div>
+<label for="trialJobRole">الصفة الوظيفية *</label>
+<select id="trialJobRole" onchange="updateJobRoleFields()">
+<option value="">اختر الصفة الوظيفية</option>
+<option value="معلم">معلم</option>
+<option value="إداري">إداري</option>
+<option value="فني">فني</option>
+</select>
+<label id="trialSubjectLabel" for="trialSubject">المادة الدراسية / المسمى الوظيفي *</label>
+<select id="trialSubject" disabled><option value="">اختر الصفة الوظيفية أولًا</option></select>
+</div><div id="trialClassWrap"><label>الصف / الشعبة *</label><select id="trialGrade">
       <option value="">اختر الصف</option>
       <option>الصف الخامس</option>
       <option>الصف السادس</option>
@@ -1015,6 +1007,27 @@ async function renderTrialSlots() {
   }
 }
 
+const LRC_JOB_OPTIONS={
+"معلم":["اللغة العربية","اللغة الإنجليزية","الرياضيات","العلوم","الفيزياء","الكيمياء","الأحياء","الدراسات الاجتماعية","التاريخ","الجغرافيا","التربية الإسلامية","تقنية المعلومات","الحاسوب","المهارات الحياتية","الفنون التشكيلية","الرياضة المدرسية","المهارات الموسيقية","مصادر التعلم","أخرى"],
+"إداري":["مدير المدرسة","مساعد المدير","أخصائي مصادر التعلم","أخصائي قواعد بيانات","أخصائي اجتماعي","منسق المدرسة","أخصائي أنشطة مدرسية","أخصائي توجيه مهني","أخصائي نفسي","مشرف إداري","مشرف لغة عربية","مشرف لغة إنجليزية","مشرف رياضيات","مشرف علوم","مشرف فيزياء","مشرف كيمياء","مشرف أحياء","مشرف دراسات اجتماعية","مشرف تاريخ","مشرف جغرافيا","مشرف تربية إسلامية","مشرف تقنية معلومات","مشرف حاسوب","مشرف مهارات حياتية","مشرف فنون تشكيلية","مشرف رياضة مدرسية","مشرف مهارات موسيقية","مشرف مصادر التعلم"],
+"فني":["فني المختبر","فني الحاسوب"]
+};
+function updateJobRoleFields(){
+ const role=document.getElementById('trialJobRole')?.value||'';
+ const field=document.getElementById('trialSubject');
+ const label=document.getElementById('trialSubjectLabel');
+ if(!field)return;
+ const title=role==='معلم'?'المادة الدراسية':(role?'المسمى الوظيفي':'المادة الدراسية / المسمى الوظيفي');
+ if(label)label.textContent=title+' *';
+ field.replaceChildren();
+ const first=document.createElement('option');
+ first.value='';first.textContent=role?'اختر '+title:'اختر الصفة الوظيفية أولًا';
+ field.appendChild(first);
+ (LRC_JOB_OPTIONS[role]||[]).forEach(v=>{
+  const opt=document.createElement('option');opt.value=v;opt.textContent=v;field.appendChild(opt);
+ });
+ field.disabled=!role;
+}
 function updateBookingFields(){
   const type=document.getElementById('trialBookingType')?.value||'student';
   const wrap=document.getElementById('trialClassWrap');
@@ -1038,14 +1051,16 @@ async function confirmTrialBooking() {
   const date=document.getElementById('trialDate').value;
   const teacher=document.getElementById('trialTeacher').value.trim();
   const subject=document.getElementById('trialSubject').value.trim();
+  const jobRole=document.getElementById('trialJobRole')?.value||'';
   const bookingType=document.getElementById('trialBookingType')?.value||'student';
   let grade=document.getElementById('trialGrade').value.trim();
   let section=document.getElementById('trialSection').value.trim();
   const purpose=document.getElementById('trialPurpose').value;
-  const notes=document.getElementById('trialNotes').value.trim();
+  const userNotes=document.getElementById('trialNotes').value.trim();
+  const notes='الصفة الوظيفية: '+jobRole+(userNotes?' | '+userNotes:'');
   const phone=lrcNormPhone(document.getElementById('trialPhone')?.value);
-  if(!date||!teacher||!subject||!purpose){
-    alert('يرجى استكمال التاريخ واسم الحاجز والمادة/الصفة والهدف من الحجز.');return
+  if(!date||!teacher||!jobRole||!subject||!purpose){
+    alert('يرجى استكمال التاريخ واسم الحاجز والصفة الوظيفية والمادة/المسمى والهدف من الحجز.');return
   }
   if(!phone){alert('يرجى إدخال رقم هاتف صحيح (8 أرقام مثل 91234567).');document.getElementById('trialPhone')?.focus();return}
   if(bookingType==='student'&&(!grade||!section)){
@@ -1133,7 +1148,8 @@ async function cancelCentralBooking(token,slot,date){
 function resetTrialForm(){
   trialChosen='';
   ['trialTeacher','trialNotes','trialPhone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
-  ['trialSubject','trialGrade','trialSection','trialPurpose','trialBookingType'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0});
+  ['trialSubject','trialJobRole','trialGrade','trialSection','trialPurpose','trialBookingType'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0});
+  updateJobRoleFields();
   updateBookingFields();
   const ok=document.getElementById('trialOk');if(ok)ok.style.display='none';
   renderTrialSlots();
@@ -2040,9 +2056,9 @@ document.addEventListener('keydown', function(e){
   <div class="visit-welcome-card">
     <div class="visit-welcome-icon">👋</div>
     <h2 id="visitWelcomeTitle">مرحبًا بكم في بوابة مركز مصادر التعلم</h2>
-    <p>للاستفادة من خدمات البوابة، يجب أولًا تسجيل زيارتكم في <b>سجل زوار المركز</b>؛ وذلك لأغراض توثيق الاستفادة وتطوير خدمات المركز.</p><div class="visit-welcome-required">⚠️ تسجيل الزيارة إلزامي ويتجدد يوميًا، ولا يمكن استخدام خدمات البوابة قبل إتمامه.</div>
+    <p>للاستفادة من خدمات البوابة، يجب أولًا تسجيل زيارتكم في <b>سجل زوار المركز</b>؛ وذلك لأغراض توثيق الاستفادة وتطوير خدمات المركز.</p><div class="visit-welcome-required">⚠️ تسجيل الزيارة إلزامي، ولا يمكن استخدام خدمات البوابة قبل إتمامه.</div>
     <div class="visit-welcome-actions">
-      <button type="button" class="visit-welcome-primary" onclick="startVisitRegistration()">📝 تسجيل الزيارة الآن</button>
+      <button type="button" class="visit-welcome-primary" onclick="startVisitRegistration()">📝 تسجيل الزيارة الآن</button><button type="button" id="lrcSpecialistSwitch" class="visit-welcome-primary" style="background:#16546b" onclick="enableLrcSpecialistMode()">👨‍💼 دخول أخصائي المركز</button>
     </div>
   </div>
 </div>
@@ -2125,13 +2141,6 @@ document.addEventListener('keydown', function(e){
 .lrc-wa-icon .ic{font-size:30px}.lrc-wa-icon b{display:block;color:#075d6b;margin:4px 0 8px}
 .lrc-wa-tpl{border:1px dashed #b9d8cb;border-radius:12px;padding:10px 12px;margin-top:8px;background:#fbfefc;white-space:pre-line;line-height:1.8;font-size:13px;color:#2d4b51}
 .lrc-wa-tpl b{color:#128c4a}
-.lrc-wa-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0 4px}
-.lrc-wa-stat{background:#f4faf6;border:1px solid #d5ece0;border-radius:14px;padding:10px 6px;text-align:center}
-.lrc-wa-stat b{display:block;font-size:22px;color:#128c4a;line-height:1.2}
-.lrc-wa-stat span{font-size:12px;color:#4d6a62}
-.lrc-wa-stat.main{background:#25d366;border-color:#1fb457}.lrc-wa-stat.main b,.lrc-wa-stat.main span{color:#fff}
-.lrc-wa-stat.bad b{color:#b42318}
-@media(max-width:560px){.lrc-wa-stats{grid-template-columns:repeat(2,1fr)}}
 #lrcWaLog table{width:100%;border-collapse:collapse;font-size:12.5px}
 #lrcWaLog th,#lrcWaLog td{border-bottom:1px solid #edf3f3;padding:7px 8px;text-align:right;vertical-align:top}
 #lrcWaLog th{background:#f3f8f8;color:#20444c;position:sticky;top:0}
@@ -2160,15 +2169,6 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
 
   <div id="lrcWaPanel" style="display:none">
    <div id="lrcWaStatus" class="lrc-wa-status">⏳ جارٍ قراءة حالة الخدمة...</div>
-   <div class="lrc-wa-stats" id="lrcWaStats">
-    <div class="lrc-wa-stat main"><b id="waStTotal">—</b><span>إجمالي الرسائل المرسلة</span></div>
-    <div class="lrc-wa-stat"><b id="waStToday">—</b><span>اليوم</span></div>
-    <div class="lrc-wa-stat"><b id="waStMonth">—</b><span>هذا الشهر</span></div>
-    <div class="lrc-wa-stat bad"><b id="waStFailed">—</b><span>تعذّر إرسالها</span></div>
-    <div class="lrc-wa-stat"><b id="waStBooking">—</b><span>📅 تأكيد حجز المركز</span></div>
-    <div class="lrc-wa-stat"><b id="waStRequest">—</b><span>📚 استلام طلب كتاب</span></div>
-    <div class="lrc-wa-stat"><b id="waStReady">—</b><span>✅ كتاب جاهز للاستلام</span></div>
-   </div>
    <div class="lrc-wa-icons">
     <div class="lrc-wa-icon"><div class="ic">🔑</div><b>Token</b><input id="lrcWaToken" type="password" autocomplete="off" dir="ltr" placeholder="Permanent Access Token"></div>
     <div class="lrc-wa-icon"><div class="ic">🆔</div><b>ID</b><input id="lrcWaPhoneId" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="Phone Number ID"></div>
@@ -2262,7 +2262,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    $('lrcWaEnabled').value=r.enabled===false?'0':'1';
    $('lrcWaTplBooking').value=r.tplBooking||'';$('lrcWaTplRequest').value=r.tplRequest||'';$('lrcWaTplReady').value=r.tplReady||'';$('lrcWaLang').value=r.lang||'ar';
    $('lrcWaVersion').textContent=r.version?('إصدار السكربت: '+r.version):'⚠️ السكربت المنشور قديم — انشر Code.gs الجديد بإصدار جديد.';
-   renderLog(r.log);renderStats(r.stats);
+   renderLog(r.log);
    if(r.configured)setStatus(r.enabled===false?'⏸️ الخدمة مُعدّة لكنها موقوفة مؤقتًا.':'✅ خدمة واتساب مفعّلة — تُرسل الرسائل تلقائيًا عند تأكيد الحجز، واستلام طلب الكتاب، وجاهزية الكتاب.','ok');
    else setStatus('⚪ الخدمة غير مفعّلة بعد — أدخل Token و ID ثم اضغط «حفظ وتفعيل».');
  }
@@ -2277,13 +2277,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    if(!Array.isArray(rows)||!rows.length){box.innerHTML='<div style="padding:14px;text-align:center;color:#60777b">لا توجد محاولات إرسال مسجلة بعد.</div>';return}
    box.innerHTML='<table><thead><tr><th>الوقت</th><th>الرقم</th><th>الرسالة</th><th>النتيجة</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(x.time)+'</td><td dir="ltr">'+esc(x.phone)+'</td><td>'+esc(x.template)+'</td><td class="'+(x.ok?'ok':'bad')+'">'+(x.ok?'✅ قُبلت لدى Meta':'❌ '+esc(x.error))+(x.hint?'<br><small style="color:#7a5200;font-weight:700">💡 '+esc(x.hint)+'</small>':'')+'</td></tr>').join('')+'</tbody></table>';
  }
- function renderStats(st){
-   const set=(id,v)=>{const el=$(id);if(el)el.textContent=(v==null?'—':v)};
-   st=st||{};
-   set('waStTotal',st.total);set('waStToday',st.today);set('waStMonth',st.month);set('waStFailed',st.failed);
-   set('waStBooking',st.booking);set('waStRequest',st.request);set('waStReady',st.ready);
- }
- window.loadWhatsAppLog=async function(){try{const r=await apiJSON({action:'waStatus',key:waKey});if(r&&r.ok){renderLog(r.log);renderStats(r.stats)}}catch(e){}};
+ window.loadWhatsAppLog=async function(){try{const r=await apiJSON({action:'waStatus',key:waKey});if(r&&r.ok)renderLog(r.log)}catch(e){}};
  window.checkWhatsAppService=async function(){
    setStatus('⏳ جارٍ فحص Token و ID لدى Meta...');
    try{const r=await apiJSON({action:'waCheck',key:waKey});setStatus((r&&r.ok?'✅ ':'⚠️ ')+esc((r&&r.message)||'تعذر الفحص').replace(/\n/g,'<br>')+(r&&r.hint?'<br><small>💡 '+esc(r.hint)+'</small>':''),r&&r.ok?'ok':'bad')}
@@ -2311,14 +2305,22 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
  $('lrcWaModal').addEventListener('click',e=>{if(e.target.id==='lrcWaModal')closeWhatsAppService()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('lrcWaModal').classList.contains('show'))closeWhatsAppService()});
 
- /* ---------- تسجيل الزيارة إلزامي ويتجدد يوميًا ---------- */
- // يُحفظ تاريخ آخر تسجيل على الجهاز؛ في كل يوم جديد يُطلب التسجيل من جديد.
- const DONE='mawala_visit_registered_day_v4';
- const isDone=()=>{try{return localStorage.getItem(DONE)===lrcToday()}catch(e){return false}};
+
+ /* ---------- بوابة الدخول: تسجيل كل جلسة زائر + وضع الأخصائي ---------- */
+ const DONE='mawala_visit_registered_v4';
+ const SPECIALIST='mawala_lrc_specialist_preference_v1';
+ const isDone=()=>{try{return sessionStorage.getItem(DONE)==='1'}catch(e){return false}};
+ const isSpecialist=()=>{try{return localStorage.getItem(SPECIALIST)==='1'}catch(e){return false}};
  const notice=()=>$('visitWelcomeNotice');
  const visitsCount=()=>{try{return (JSON.parse(localStorage.getItem('mawala_lrc_visits_v1')||'[]')||[]).length}catch(e){return 0}};
+ function unlockPortal(){
+   try{sessionStorage.setItem(DONE,'1')}catch(e){}
+   document.body.classList.remove('lrc-visit-required');
+   const n=notice();if(n)n.classList.remove('show');
+ }
  function requireVisit(){
    if(isDone())return;
+   if(isSpecialist()){unlockPortal();return;}
    document.body.classList.add('lrc-visit-required');
    const m=$('interactiveVisitModal');
    if(m&&m.classList.contains('show'))return;
@@ -2326,6 +2328,23 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
  }
  window.closeVisitWelcomeNotice=function(){if(isDone()){const n=notice();if(n)n.classList.remove('show')}};
  window.startVisitRegistration=function(){const n=notice();if(n)n.classList.remove('show');openInteractiveVisitModal()};
+ window.enableLrcSpecialistMode=function(){
+   // A client-side convenience preference, not authentication.
+   if(!confirm('وضع أخصائي المركز مخصص لجهازك الشخصي فقط. لا يوفر هذا الخيار تحققًا أمنيًا من الهوية. هل تريد المتابعة؟'))return;
+   try{localStorage.setItem(SPECIALIST,'1')}catch(e){}
+   unlockPortal();
+   alert('تم تفعيل وضع الأخصائي على هذا المتصفح. لن تحتاج إلى تعبئة سجل الزيارة في كل مرة. لإلغائه استخدم زر إنهاء وضع الأخصائي.');
+   updateSpecialistButton();
+ };
+ window.disableLrcSpecialistMode=function(){
+   try{localStorage.removeItem(SPECIALIST);sessionStorage.removeItem(DONE)}catch(e){}
+   updateSpecialistButton();requireVisit();
+ };
+ function updateSpecialistButton(){
+   const b=$('lrcSpecialistSwitch');if(!b)return;
+   b.textContent=isSpecialist()?'🔒 إنهاء وضع الأخصائي':'👨‍💼 دخول أخصائي المركز';
+   b.onclick=isSpecialist()?window.disableLrcSpecialistMode:window.enableLrcSpecialistMode;
+ }
  const origClose=window.closeInteractiveVisitModal;
  window.closeInteractiveVisitModal=function(){origClose.apply(this,arguments);if(!isDone())setTimeout(requireVisit,30)};
  const origSave=window.saveVisit;
@@ -2333,8 +2352,7 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
    const before=visitsCount();
    origSave.apply(this,arguments);
    if(!isDone()&&visitsCount()>before){
-     try{localStorage.setItem(DONE,lrcToday())}catch(e){}
-     document.body.classList.remove('lrc-visit-required');
+     unlockPortal();
      setTimeout(()=>{
        origClose();
        const t=document.createElement('div');t.className='lrc-toast';t.textContent='✅ تم تسجيل زيارتك — مرحبًا بك في بوابة مركز مصادر التعلم';
@@ -2342,13 +2360,11 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
      },1100);
    }
  };
- // أي محاولة لإخفاء الترحيبية قبل التسجيل تُعيد إظهارها.
  const n=notice();
  if(n)new MutationObserver(()=>{if(!isDone()&&!n.classList.contains('show')){const m=$('interactiveVisitModal');if(!(m&&m.classList.contains('show')))setTimeout(requireVisit,30)}}).observe(n,{attributes:true,attributeFilter:['class','style']});
+ updateSpecialistButton();
  if(document.readyState==='complete')setTimeout(requireVisit,400);else window.addEventListener('load',()=>setTimeout(requireVisit,400));
- // إذا بقيت الصفحة مفتوحة حتى اليوم التالي يُطلب التسجيل تلقائيًا.
- setInterval(()=>{if(!isDone())requireVisit()},60000);
- document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!isDone())requireVisit()});
+
 })();
 </script>
 
