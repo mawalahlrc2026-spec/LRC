@@ -419,6 +419,9 @@ function setBookingConnectionStatus(type,text){
 <aside class="booking-side"><h4>👤 3. بيانات الحجز</h4><label>نوع الحجز *</label><select id="trialBookingType" onchange="updateBookingFields()">
       <option value="student">حصة / نشاط للطلبة</option>
       <option value="training">مشغل أو تدريب للمعلمين</option>
+      <option value="professional_development">الإنماء المهني للمعلمين</option>
+      <option value="student_course">دورة تدريبية للطلبة</option>
+      <option value="workshop">ورشة عمل</option>
       <option value="supervision">إشراف / زيارة تربوية</option>
       <option value="admin">اجتماع أو عمل إداري</option>
       <option value="other">استخدام آخر للمركز</option>
@@ -509,9 +512,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 .lba-stat b{display:block;font-size:21px;color:#087665}
 @media(max-width:700px){.lba-filters,.lba-stats{grid-template-columns:1fr 1fr}}
 @media print{
- body *{visibility:hidden!important}
- #localBookingAdmin,#localBookingAdmin *{visibility:visible!important}
- #localBookingAdmin{position:absolute;inset:0;background:#fff;padding:18px}
+ body.print-local-bookings *{visibility:hidden!important}
+ body.print-local-bookings #localBookingAdmin,#localBookingAdmin *{visibility:visible!important}
+ body.print-local-bookings #localBookingAdmin{position:absolute;inset:0;background:#fff;padding:18px}
  .lba-toolbar,.lba-filters,.lba-action{display:none!important}
  .lba-table-wrap{overflow:visible;border:0}
  .lba-table{min-width:0;font-size:11px}
@@ -597,7 +600,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><h2 style="margin:0;color:#075d6b">سجل حجوزات مركز مصادر التعلم</h2><div>مدرسة معولة بن شمس للتعليم الأساسي (5–12)</div></div><button class="lba-btn secondary" onclick="closeLocalBookingAdmin()">إغلاق ✕</button></div>
    <div class="lba-stats"><div class="lba-stat"><b id="stAll">0</b>إجمالي الحجوزات</div><div class="lba-stat"><b id="stToday">0</b>حجوزات اليوم</div><div class="lba-stat"><b id="stTeachers">0</b>المعلمون المستفيدون</div><div class="lba-stat"><b id="stSlots">0</b>الحصص المستخدمة</div></div>
    <div class="lba-filters"><input type="date" id="fFrom"><input type="date" id="fTo"><input id="fText" placeholder="بحث باسم المعلم أو المادة أو الصف"></div>
-   <div class="lba-toolbar"><button class="lba-btn" style="font-size:16px;padding:13px 20px" onclick="window.print()">🖨️ طباعة سجل الحجوزات / حفظ PDF</button><button class="lba-btn secondary" onclick="exportLRCBookings()">⬇️ نسخة احتياطية</button><button class="lba-btn secondary" onclick="document.getElementById('restoreBookings').click()">⬆️ استعادة نسخة</button><input type="file" id="restoreBookings" accept=".json" style="display:none" onchange="restoreLRCBookings(this)"><button class="lba-btn secondary" onclick="renderLRCBookings()">تحديث</button></div>
+   <div class="lba-toolbar"><button class="lba-btn" style="font-size:16px;padding:13px 20px" onclick="printLrcReport('print-local-bookings')">🖨️ طباعة سجل الحجوزات / حفظ PDF</button><button class="lba-btn secondary" onclick="exportLRCBookings()">⬇️ نسخة احتياطية</button><button class="lba-btn secondary" onclick="document.getElementById('restoreBookings').click()">⬆️ استعادة نسخة</button><input type="file" id="restoreBookings" accept=".json" style="display:none" onchange="restoreLRCBookings(this)"><button class="lba-btn secondary" onclick="renderLRCBookings()">تحديث</button></div>
    <div class="lba-table-wrap"><table class="lba-table"><thead><tr><th>#</th><th>التاريخ</th><th>الحصة</th><th>المعلم</th><th>المادة</th><th>الصف/الشعبة</th><th>الهدف</th><th>الاحتياجات/الملاحظات</th><th>وقت التسجيل</th><th class="lba-action">إجراء</th></tr></thead><tbody id="lbaRows"></tbody></table></div>
    <p style="font-size:12px;color:#667;margin-top:10px">نسخة تجريبية للجهاز الواحد: تحفظ البيانات على هذا المتصفح. استخدم «نسخة احتياطية» بصورة دورية.</p>
    </div>`;
@@ -635,7 +638,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
    b.style.cssText='position:fixed;bottom:18px;left:18px;z-index:9998;background:#075d6b;color:#fff;border:0;border-radius:18px;padding:12px 16px;font-weight:700;box-shadow:0 5px 18px #0003;cursor:pointer';
    /* زر إدارة الحجوزات السفلي أُلغي من الواجهة */
    const p=document.createElement('button'); p.textContent='🖨️ طباعة سجل الحجوزات';
-   p.onclick=function(){ openLocalBookingAdmin(); setTimeout(()=>window.print(),250); };
+   p.onclick=function(){ openLocalBookingAdmin(); setTimeout(()=>printLrcReport('print-local-bookings'),250); };
    p.style.cssText='position:fixed;bottom:68px;left:18px;z-index:9998;background:#ffffff;color:#075d6b;border:2px solid #075d6b;border-radius:18px;padding:12px 16px;font-weight:700;box-shadow:0 5px 18px #0002;cursor:pointer';
    document.body.appendChild(p);
  });
@@ -654,8 +657,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 .vStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}.vStat{background:#f0f8f7;border-radius:12px;text-align:center;padding:11px}.vStat b{display:block;color:#087665;font-size:21px}
 @media(max-width:700px){.vGrid{grid-template-columns:1fr}.vFull{grid-column:auto}.vTabs{grid-template-columns:1fr}.vStats{grid-template-columns:1fr 1fr}}
 @media print{
- body *{visibility:hidden!important}#interactiveVisitModal,#interactiveVisitModal *{visibility:visible!important}#interactiveVisitModal{display:block!important;position:absolute;inset:0;background:#fff;padding:0}.visitBox{margin:0;max-width:none;box-shadow:none}
- .vTabs,.vGrid,.vOk,.vClose,.vNoPrint{display:none!important}.vTableWrap{overflow:visible;border:0}.vTable{min-width:0}.vTable th,.vTable td{font-size:11px;padding:6px}
+ body.print-visits *{visibility:hidden!important}body.print-visits #interactiveVisitModal,body.print-visits #interactiveVisitModal *{visibility:visible!important}body.print-visits #interactiveVisitModal{display:block!important;position:absolute;inset:0;background:#fff;padding:0}.visitBox{margin:0;max-width:none;box-shadow:none}
+ body.print-visits .vTabs,body.print-visits .vGrid,body.print-visits .vOk,body.print-visits .vClose,body.print-visits .vNoPrint{display:none!important}body.print-visits .vTableWrap{overflow:visible;border:0}.vTable{min-width:0}.vTable th,.vTable td{font-size:11px;padding:6px}
 }
 </style>
 <div id="interactiveVisitModal"><div class="visitBox">
@@ -674,7 +677,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
    <input id="vDate" type="date">
    <textarea class="vFull" id="vNotes" rows="2" placeholder="ملاحظات - اختياري"></textarea>
  </div>
- <div class="vTools vNoPrint"><button class="vBtn" onclick="saveVisit()">✓ تسجيل الزيارة</button><button class="vBtn alt" onclick="window.print()">🖨️ طباعة التقرير</button><button class="vBtn alt" onclick="exportVisits()">⬇️ نسخة احتياطية</button></div>
+ <div class="vTools vNoPrint"><button class="vBtn" onclick="saveVisit()">✓ تسجيل الزيارة</button><button class="vBtn alt" onclick="printLrcReport('print-visits')">🖨️ طباعة التقرير</button><button class="vBtn alt" onclick="exportVisits()">⬇️ نسخة احتياطية</button></div>
  <div class="vOk" id="vOk">تم تسجيل الزيارة بنجاح.</div>
  <div class="vStats"><div class="vStat"><b id="vsAll">0</b>إجمالي الزيارات</div><div class="vStat"><b id="vsToday">0</b>زيارات اليوم</div><div class="vStat"><b id="vsField">0</b>حضوري</div><div class="vStat"><b id="vsDevices">0</b>أجهزة المركز</div><div class="vStat"><b id="vsRemote">0</b>رقمي عن بُعد</div><div class="vStat"><b id="vsStudents">0</b>الطلبة</div><div class="vStat"><b id="vsStaff">0</b>الهيئة والزوار</div></div>
  <h3 id="visitListHeading">قائمة زيارات الطلبة</h3>
@@ -1034,13 +1037,13 @@ function updateBookingFields(){
   const grade=document.getElementById('trialGrade');
   const section=document.getElementById('trialSection');
   const purpose=document.getElementById('trialPurpose');
-  const isStudent=type==='student';
+  const isStudent=type==='student'||type==='student_course';
   if(wrap) wrap.style.display=isStudent?'block':'none';
   if(!isStudent){
     if(grade) grade.value='';
     if(section) section.value='';
     if(purpose){
-      const defaults={training:'التدريب وورش العمل',supervision:'أخرى',admin:'عقد اجتماع',other:'أخرى'};
+      const defaults={training:'التدريب وورش العمل',professional_development:'التدريب وورش العمل',workshop:'التدريب وورش العمل',supervision:'أخرى',admin:'عقد اجتماع',other:'أخرى'};
       if(defaults[type]) purpose.value=defaults[type];
     }
   }
@@ -1063,12 +1066,12 @@ async function confirmTrialBooking() {
     alert('يرجى استكمال التاريخ واسم الحاجز والصفة الوظيفية والمادة/المسمى والهدف من الحجز.');return
   }
   if(!phone){alert('يرجى إدخال رقم هاتف صحيح (8 أرقام مثل 91234567).');document.getElementById('trialPhone')?.focus();return}
-  if(bookingType==='student'&&(!grade||!section)){
+  if((bookingType==='student'||bookingType==='student_course')&&(!grade||!section)){
     alert('يرجى اختيار الصف والشعبة للحجز المرتبط بالطلبة.');return
   }
   // للحجوزات الخاصة بالمعلمين والمشرفين والإداريين لا نطلب صفًا أو شعبة،
   // ونرسل شرطة للسجل المركزي حتى تبقى بنية السجل متوافقة دون تعديل Apps Script.
-  if(bookingType!=='student'){grade='—';section='—';}
+  if(bookingType!=='student'&&bookingType!=='student_course'){grade='—';section='—';}
   const chosenBeforeRequest=trialChosen;
   try{
     // Re-check immediately before saving to reduce duplicate bookings.
@@ -1494,7 +1497,21 @@ function printBookRequests(){
   w.document.write(`<html dir="rtl"><head><meta charset="utf-8"><title>قائمة الكتب المحجوزة</title><style>body{font-family:Tahoma,Arial;padding:25px}h2{text-align:center}table{width:100%;border-collapse:collapse}th,td{border:1px solid #444;padding:6px;font-size:12px;text-align:right}th{background:#eee}</style>
 
 
-</head><body><div style="text-align:center">وزارة التعليم<br>مدرسة معولة بن شمس للتعليم الأساسي (5–12)<br>مركز مصادر التعلم</div><h2>قائمة الكتب المحجوزة والمطلوب تجهيزها</h2><table><thead><tr><th>م</th><th>الكتاب</th><th>التصنيف</th><th>المستفيد</th><th>الفئة</th><th>الصف</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${escBooking(x.title)}</td><td>${escBooking(x.classNo)}</td><td>${escBooking(x.name)}</td><td>${escBooking(x.type)}</td><td>${escBooking(x.grade)}</td><td>${escBooking(x.date)}</td><td>${escBooking(x.status)}</td></tr>`).join('')}</tbody></table></body></html>`);
+</head><body><div style="text-align:center">وزارة التعليم<br>مدرسة معولة بن شمس للتعليم الأساسي (5–12)<br>مركز مصادر التعلم</div><h2>قائمة الكتب المحجوزة والمطلوب تجهيزها</h2><table><thead><tr><th>م</th><th>الكتاب</th><th>التصنيف</th><th>المستفيد</th><th>الفئة</th><th>الصف</th><th>التاريخ</th><th>الحالة</th></tr></thead><tbody>${rows.map((x,i)=>`<tr><td>${i+1}</td><td>${escBooking(x.title)}</td><td>${escBooking(x.classNo)}</td><td>${escBooking(x.name)}</td><td>${escBooking(x.type)}</td><td>${escBooking(x.grade)}</td><td>${escBooking(x.date)}</td><td>${escBooking(x.status)}</td></tr>`).join('')}</tbody></table>
+<script id="lrc-print-report-fix">
+(function(){
+ const modes=['print-local-bookings','print-visits','print-daily','print-central-bookings','stats-detail-print'];
+ window.printLrcReport=function(mode){
+  modes.forEach(x=>document.body.classList.remove(x));
+  document.body.classList.add(mode);
+  const cleanup=()=>{document.body.classList.remove(mode);window.removeEventListener('afterprint',cleanup)};
+  window.addEventListener('afterprint',cleanup);
+  window.print();
+  setTimeout(cleanup,1500);
+ };
+})();
+<\/script>
+</body></html>`);
   w.document.close();w.focus();setTimeout(()=>w.print(),300);
 }
 </script>
@@ -2329,12 +2346,17 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
  window.closeVisitWelcomeNotice=function(){if(isDone()){const n=notice();if(n)n.classList.remove('show')}};
  window.startVisitRegistration=function(){const n=notice();if(n)n.classList.remove('show');openInteractiveVisitModal()};
  window.enableLrcSpecialistMode=function(){
-   // A client-side convenience preference, not authentication.
-   if(!confirm('وضع أخصائي المركز مخصص لجهازك الشخصي فقط. لا يوفر هذا الخيار تحققًا أمنيًا من الهوية. هل تريد المتابعة؟'))return;
+   // Browser-only PIN gate. This does not grant secure server-side privileges.
+   const entered=prompt('دخول أخصائي مصادر التعلم\nأدخل الرقم السري الخاص:');
+   if(entered===null)return;
+   if(entered.trim()!=='1980'){
+     alert('الرقم السري غير صحيح. يرجى المحاولة مرة أخرى.');
+     return;
+   }
    try{localStorage.setItem(SPECIALIST,'1')}catch(e){}
    unlockPortal();
-   alert('تم تفعيل وضع الأخصائي على هذا المتصفح. لن تحتاج إلى تعبئة سجل الزيارة في كل مرة. لإلغائه استخدم زر إنهاء وضع الأخصائي.');
    updateSpecialistButton();
+   alert('مرحبًا بك. تم تفعيل الدخول المباشر للأخصائي على هذا المتصفح.');
  };
  window.disableLrcSpecialistMode=function(){
    try{localStorage.removeItem(SPECIALIST);sessionStorage.removeItem(DONE)}catch(e){}
@@ -2368,4 +2390,32 @@ body.lrc-visit-required #interactiveVisitModal .vClose{display:none!important}
 })();
 </script>
 
+
+<!-- زر دائم لدخول أخصائي المركز: يظهر حتى بعد تسجيل زيارة سابقة -->
+<style id="lrc-specialist-permanent-style">
+#lrcSpecialistPermanent{position:fixed;bottom:18px;left:18px;z-index:1000002;border:0;border-radius:30px;background:#16546b;color:#fff;padding:12px 18px;font-family:inherit;font-size:14px;font-weight:800;box-shadow:0 4px 16px #0004;cursor:pointer;direction:rtl}
+#lrcSpecialistPermanent:focus-visible{outline:3px solid #e5b948;outline-offset:3px}
+@media(max-width:600px){#lrcSpecialistPermanent{bottom:12px;left:10px;padding:10px 12px;font-size:12px}}
+</style>
+<button id="lrcSpecialistPermanent" type="button" onclick="lrcPermanentSpecialistClick()" aria-label="دخول أخصائي مركز مصادر التعلم">👨‍💼 دخول أخصائي المركز</button>
+<script>
+(function(){
+  const KEY='mawala_lrc_specialist_preference_v1';
+  const btn=document.getElementById('lrcSpecialistPermanent');
+  function active(){try{return localStorage.getItem(KEY)==='1'}catch(e){return false}}
+  function update(){if(btn)btn.textContent=active()?'🔒 إنهاء دخول الأخصائي':'👨‍💼 دخول أخصائي المركز'}
+  window.lrcPermanentSpecialistClick=function(){
+    if(active()){
+      if(confirm('هل تريد إنهاء وضع أخصائي المركز على هذا الجهاز؟')){
+        if(typeof window.disableLrcSpecialistMode==='function')window.disableLrcSpecialistMode();
+        else {try{localStorage.removeItem(KEY)}catch(e){}location.reload()}
+      }
+    }else if(typeof window.enableLrcSpecialistMode==='function'){
+      window.enableLrcSpecialistMode();
+    }else alert('تعذر تهيئة دخول الأخصائي. أعد تحميل الصفحة ثم حاول مجددًا.');
+    update();
+  };
+  update();
+})();
+</script>
 </body></html>
